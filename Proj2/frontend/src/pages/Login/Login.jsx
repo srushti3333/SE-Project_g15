@@ -28,6 +28,7 @@ const Login = () => {
             console.log('API response:', data);
 
             alert('Login successful!');
+            navigate('/dashboard');  // go to dashboard if the user is successfully logged in
             setPassword('');
             setUsername('');
 
