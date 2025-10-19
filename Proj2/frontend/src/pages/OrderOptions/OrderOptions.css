@@ -1,0 +1,9 @@
+/* src/pages/OrderOptions/OrderOptions.css */
+
+/* Most styles are inline in the OrderOptions component */
+/* Add any additional custom styles here if needed */
+
+.order-options-container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, #e0f2fe, #dbeafe);
+}
