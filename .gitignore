@@ -46,24 +46,3 @@ backend/.env
 # === Misc ===
 *.bak
 *.tmp
-
-# === Python / Flask Specific ===
-__pycache__/
-*.pyc
-instance/
-.mypy_cache/
-*.db
-
-# Node modules
-node_modules/
-frontend/node_modules/
-backend/node_modules/
-
-# Python
-__pycache__/
-*.pyc
-
-# Environment
-.env
-backend/.env
-frontend/.env
