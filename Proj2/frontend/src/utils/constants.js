@@ -58,10 +58,63 @@ export const RESTAURANTS = [
 
 // Mock groups data
 export const GROUPS = [
-  { id: 1, name: "Office Lunch Crew", members: 8, nextOrder: "Today 12:30 PM" },
+  { id: 1, name: "Office Lunch Crew", members: 8, nextOrder: "Today 11:30 PM" },
   { id: 2, name: "Weekend Foodies", members: 12, nextOrder: "Saturday 7:00 PM" },
   { id: 3, name: "Study Group Eats", members: 5, nextOrder: "Tomorrow 6:00 PM" }
 ];
+
+// Mock group details data
+export const GROUP_DETAILS = {
+  1: {
+    id: 1,
+    name: "Office Lunch Crew",
+    restaurant: "Pizza Palace",
+    restaurant_id : 1,
+    organizer: "Alice",
+    members: ["Alice", "Bob", "Charlie", "David", "Eva", "Frank", "Grace", "Hannah"],
+    deliveryType: "Doorstep",
+    nextOrderTime: new Date(new Date().setHours(12, 30, 0)), // Today 12:30 PM
+    deliveryLocation: "Office Lobby",
+    scheduledTime: "12:45 PM",
+    maxMembers: 10,
+    menu: [
+      { id: 101, name: "Burger", price: 8 },
+      { id: 102, name: "Salad", price: 6 }
+    ]
+  },
+  2: {
+    id: 2,
+    name: "Weekend Foodies",
+    restaurant: "Pasta Place",
+    restaurant_id : 2,
+    organizer: "Bob",
+    members: ["Ivy", "Jack", "Kate", "Leo", "Mona", "Nate", "Olivia", "Paul", "Quinn", "Rita", "Sam", "Tina"],
+    deliveryType: "Pickup Hub",
+    nextOrderTime: new Date(new Date().setHours(19, 0, 0)), // Saturday 7 PM
+    deliveryLocation: "Community Center",
+    maxMembers: 15,
+    menu: [
+      { id: 201, name: "Pizza", price: 10 },
+      { id: 202, name: "Pasta", price: 9 }
+    ]
+  },
+  3: {
+    id: 3,
+    name: "Study Group Eats",
+    restaurant: "Sushi Bar",
+    restaurant_id : 3,
+    organizer: "Uma",
+    members: ["Uma", "Victor", "Wendy", "Xander", "Yara"],
+    deliveryType: "Doorstep",
+    nextOrderTime: new Date(new Date().setHours(18, 0, 0)), // Tomorrow 6 PM
+    deliveryLocation: "Library Lobby",
+    maxMembers: 8,
+    menu: [
+      { id: 301, name: "Sushi", price: 12 },
+      { id: 302, name: "Ramen", price: 11 }
+    ]
+  }
+};
 
 // Mock nearby pools data
 export const NEARBY_POOLS = [
@@ -119,7 +172,9 @@ export const CONFIG = {
 export const PAGES = {
   HOME: 'home',
   MY_GROUPS: 'mygroups',
-  FIND_GROUPS: 'findgroups'
+  FIND_GROUPS: 'findgroups',
+  EDIT_GROUP: 'editgroup',
+  CREATE_POLL: 'createpoll'
 };
 
 // Order options
@@ -127,4 +182,23 @@ export const ORDER_OPTIONS = {
   NOW: 'now',
   CREATE: 'create',
   JOIN: 'join'
+};
+
+export const GROUP_POLLS = {
+  1: [
+    {
+      id: 1,
+      createdBy: "Bob",
+      createdOn: new Date('2024-06-10T10:00:00'),
+      question: "What cuisine should we order next?",
+      options: [
+        { text: "Indian", votes: 2 },
+        { text: "Chinese", votes: 1 },
+        { text: "Mexican", votes: 0 }
+      ],
+      votedUsers: ["Bob"],
+      createdBy: "Alice"
+    }
+  ],
+  2: []
 };

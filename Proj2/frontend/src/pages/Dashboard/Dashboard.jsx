@@ -6,15 +6,24 @@ import Navbar from '../../components/common/Navbar/Navbar';
 import CartSidebar from '../../components/common/Cart/CartSidebar';
 import RestaurantCard from '../../components/restaurant/RestaurantCard';
 import MenuItemCard from '../../components/restaurant/MenuItemCard';
+import GroupDetail from '../../components/group/GroupDetail';
 import GroupCard from '../../components/group/GroupCard';
+import EditGroupPage from '../EditGroup/EditGroupPage';
 import Button from '../../components/common/Button/Button';
-import { RESTAURANTS, GROUPS, PAGES } from '../../utils/constants';
+import { RESTAURANTS, GROUPS, PAGES, GROUP_DETAILS, GROUP_POLLS } from '../../utils/constants';
+import CreatePollPage from '../Poll/CreatePollPage';
+
 import './Dashboard.css';
 
 function Dashboard() {
   const [currentPage, setCurrentPage] = useState(PAGES.HOME);
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const { addToCart } = useCart();
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [editingGroup, setEditingGroup] = useState(null);
+  const [pollGroup, setPollGroup] = useState(null);
+
+
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -53,14 +62,14 @@ function Dashboard() {
         {/* Home Page - Restaurant Detail */}
         {currentPage === PAGES.HOME && selectedRestaurant && (
           <div>
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               onClick={handleBackToRestaurants}
               className="back-button"
             >
               ← Back to Restaurants
             </Button>
-            
+
             <div className="restaurant-detail">
               <div className="restaurant-header">
                 <div className="restaurant-emoji-large">{selectedRestaurant.image}</div>
@@ -89,19 +98,37 @@ function Dashboard() {
         )}
 
         {/* My Groups Page */}
+        {/* // In the "My Groups" section: */}
         {currentPage === PAGES.MY_GROUPS && (
           <div>
+            {/* Inline Group Detail Card */}
+            {selectedGroup && (
+              <div className="mt-8">
+                <GroupDetail
+                  group={selectedGroup}
+                  onClose={() => setSelectedGroup(null)}
+                  onEditGroup={(grp) => {
+                    setEditingGroup(grp);
+                    setCurrentPage(PAGES.EDIT_GROUP);
+                  }}
+                  onCreatePoll={(grp) => {
+                    setPollGroup(grp);
+                    setCurrentPage(PAGES.CREATE_POLL);
+                  }}
+                />
+              </div>
+            )}
             <h2 className="page-title">My Groups</h2>
             <div className="groups-grid">
               {GROUPS.slice(0, 2).map(group => (
                 <GroupCard
                   key={group.id}
                   group={group}
-                  isJoinable={false}
-                  onAction={() => console.log('View group:', group.id)}
+                  onAction={(grp) => setSelectedGroup(GROUP_DETAILS[grp.id])}
                 />
               ))}
             </div>
+
           </div>
         )}
 
@@ -121,6 +148,32 @@ function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Edit Group Page */}
+        {currentPage === PAGES.EDIT_GROUP && editingGroup && (
+          <EditGroupPage
+            group={editingGroup}
+            onSave={(updated) => {
+              console.log("Saved updated group", updated);
+              setEditingGroup(null);
+              setCurrentPage(PAGES.MY_GROUPS);
+            }}
+            onCancel={() => {
+              setEditingGroup(null);
+              setCurrentPage(PAGES.MY_GROUPS);
+            }}
+          />
+        )}
+
+        {/* Create Poll Page */}
+        {currentPage === PAGES.CREATE_POLL && (
+          <CreatePollPage
+            group={pollGroup}
+            onBack={() => setCurrentPage(PAGES.MY_GROUPS)}
+          />
+        )}
+
+
       </div>
 
       <CartSidebar selectedRestaurant={selectedRestaurant} />
