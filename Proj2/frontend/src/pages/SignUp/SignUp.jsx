@@ -36,23 +36,25 @@ const SignUp = () => {
   );
 
   const onSubmit = async (formValues) => {
-  try {
-    const data = await signupUser(
-      formValues.username,
-      formValues.email,
-      formValues.password
-    );
-    console.log("Signup success:", data);
-    alert("Signup successful! You can now login.");
-    reset();
-    navigate("/login");
-  } catch (err) {
-    console.error("Signup error:", err);
-    setErrors({ submit: "Signup failed. Try again." });
-    setLoading(false);
-  }
-};
-
+    try {
+      const response = await signupUser(
+        formValues.username,
+        formValues.email,
+        formValues.password
+      );
+      
+      const data = await response.json();
+      console.log('Signup response:', data);
+      
+      alert('Signup successful! You can now login.');
+      reset();
+      navigate('/login');
+    } catch (err) {
+      console.error('Signup error:', err);
+      setErrors({ submit: 'Signup failed. Please try again.' });
+      setLoading(false);
+    }
+  };
 
   const isFormValid = 
     values.username.trim() !== '' && 

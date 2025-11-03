@@ -1,25 +1,19 @@
-// src/components/group/GroupCard.jsx
-
 import React from 'react';
-import Button from '../common/Button/Button';
 import './GroupCard.css';
+import Button from '../common/Button/Button';
 
-const GroupCard = ({ group, isJoinable = false, onAction }) => {
+const GroupCard = ({ group, onAction, actionLabel }) => {
   return (
-    <div className="group-card">
-      <div className="group-header">
-        <h3 className="group-name">{group.name}</h3>
-        <span className="group-icon">👥</span>
-      </div>
-      <p className="group-members">{group.members} members</p>
-      <p className="group-next-order">Next Order: {group.nextOrder}</p>
-      <Button 
-        variant={isJoinable ? "success" : "primary"}
-        size="medium"
-        fullWidth
-        onClick={onAction}
+    <div className="group-card p-4 border rounded shadow hover:shadow-lg cursor-pointer">
+      <h3 className="font-semibold text-lg">{group.name}</h3>
+      <p>{group.members.length} members</p>
+      <p>Next order: {group.nextOrder}</p>
+      <Button
+        variant="primary"
+        onClick={() => onAction(group)}
+        className="mt-2"
       >
-        {isJoinable ? 'Join Group' : 'View Group'}
+        {actionLabel || 'View Group'}
       </Button>
     </div>
   );

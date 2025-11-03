@@ -23,32 +23,31 @@ export const useForm = (initialValues, validationFn) => {
     }
   };
 
-  const handleSubmit = (callback) => {
-  return async (e) => {
-    e.preventDefault();
-
-    // Run validation if provided
-    if (validationFn) {
-      const validationErrors = validationFn(values);
-      if (Object.keys(validationErrors).length > 0) {
-        setErrors(validationErrors);
-        return;
+  const handleSubmit = async (callback) => {
+    return async (e) => {
+      e.preventDefault();
+      
+      // Run validation if provided
+      if (validationFn) {
+        const validationErrors = validationFn(values);
+        if (Object.keys(validationErrors).length > 0) {
+          setErrors(validationErrors);
+          return;
+        }
       }
-    }
 
-    setLoading(true);
-    setErrors({});
+      setLoading(true);
+      setErrors({});
 
-    try {
-      await callback(values);
-    } catch (error) {
-      setErrors({ submit: error.message || 'An error occurred' });
-    } finally {
-      setLoading(false);
-    }
+      try {
+        await callback(values);
+      } catch (error) {
+        setErrors({ submit: error.message || 'An error occurred' });
+      } finally {
+        setLoading(false);
+      }
+    };
   };
-};
-
 
   const reset = () => {
     setValues(initialValues);

@@ -1,25 +1,30 @@
 from flask import Flask
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from models import db, bcrypt
-from config import Config
-from routes.auth_routes import auth_bp
+from extensions import db, cors
+from routes import bp as api_bp
 
-app = Flask(__name__)
-app.config.from_object(Config)
-
-CORS(app)
-db.init_app(app)
-bcrypt.init_app(app)
-JWTManager(app)
-
-@app.route('/')
-def home():
-    return "Flask backend connected successfully!", 200
-
-app.register_blueprint(auth_bp, url_prefix='/api/auth')
+def create_app():
+    app = Flask(__name__)
+    
+    # Database Configuration
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:srushti@localhost:5432/foodpool'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Initialize extensions
+    db.init_app(app)
+    cors.init_app(app)
+    
+    # Register blueprints
+    app.register_blueprint(api_bp)
+    
+    # Initialize database
+    with app.app_context():
+        # Import models here to ensure they're registered with SQLAlchemy
+        import models
+        db.create_all()
+        print("✅ Database tables created!")
+    
+    return app
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(port=Config.PORT, debug=True)
+    app = create_app()
+    app.run(debug=True, port=5000)

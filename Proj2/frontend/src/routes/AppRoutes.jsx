@@ -6,6 +6,8 @@ import Login from '../pages/Login/Login';
 import SignUp from '../pages/SignUp/SignUp';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import OrderOptions from '../pages/OrderOptions/OrderOptions';
+import GroupsPage from '../components/group/GroupPage';
+import GroupDetailPage from '../components/group/GroupDetail';
 
 const AppRoutes = () => {
   return (
@@ -15,6 +17,8 @@ const AppRoutes = () => {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/order-options" element={<OrderOptions />} />
+      <Route path="/groups" element={<GroupsPage />} />
+      <Route path="/groups/:id" element={<GroupDetailPage />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

@@ -16,30 +16,20 @@ const Login = () => {
     password: ''
   });
 
-const onSubmit = async (formValues) => {
-  try {
-    // call loginUser using the frontend username field
-    const data = await loginUser(formValues.username, formValues.password);
-    console.log("Login success:", data);
-
-    // if backend sends token and user
-    if (data?.token) {
-      alert("Login successful!");
-      navigate("/dashboard");
-      return;
+  const onSubmit = async (formValues) => {
+    try {
+      const response = await loginUser(formValues.username, formValues.password);
+      const data = await response.json();
+      
+      console.log('API response:', data);
+      alert('Login successful!');
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      setErrors({ submit: 'Login failed. Please try again.' });
+      setLoading(false);
     }
-
-    // If backend returned something else, log it and show message
-    setErrors({ submit: data?.message || "Login failed. Please try again." });
-    setLoading(false);
-  } catch (err) {
-    // err may be { message: "Invalid credentials" } from backend
-    console.error("Login error:", err);
-    setErrors({ submit: err?.message || "Login failed. Please try again." });
-    setLoading(false);
-  }
-};
-
+  };
 
   const isFormValid = values.username.trim() !== '' && values.password.trim() !== '';
 
