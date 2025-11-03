@@ -1,49 +1,64 @@
-// import axios from './axios';
+import api from './axios';
 
-// // returns all groups user is part of
-// export const getUserGroups = async () => {
-//   const response = await axios.get('/groups/my-groups');
-//   return response.data;
-// };
-
-// // returns details of a single group
-// export const getGroupDetails = async (groupId) => {
-//   const response = await axios.get(`/groups/${groupId}`);
-//   return response.data;
-// };
-
-// // place order in that group
-// export const placeGroupOrder = async (groupId, orderData) => {
-//   const response = await axios.post(`/groups/${groupId}/orders`, orderData);
-//   return response.data;
-// };
-
-import { GROUPS, GROUP_DETAILS } from '../utils/constants';
-
-// Mock: returns all groups the user is part of
-export const getUserGroups = async () => {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(GROUP_DETAILS), 500); // simulate network delay
-  });
+// Get all groups (for Find Groups page)
+export const getAllGroups = async () => {
+  const response = await api.get('/groups');
+  return response.data;
 };
 
-// Mock: returns details of a single group
+// Get user's groups
+export const getUserGroups = async (username = 'Alice') => {
+  const response = await api.get(`/groups/my-groups?username=${username}`);
+  return response.data;
+};
+
+// Get specific group details
 export const getGroupDetails = async (groupId) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      const data = GROUP_DETAILS[groupId];
-      data ? resolve(data) : reject({ message: 'Group not found' });
-    }, 500);
-  });
+  const response = await api.get(`/groups/${groupId}`);
+  return response.data;
 };
 
-// Mock: place order in that group
-export const placeGroupOrder = async (groupId, orderData) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (!GROUP_DETAILS[groupId]) return reject({ message: 'Group not found' });
-      // For mock purposes, just return the order summary
-      resolve({ groupId, items: orderData.items, status: 'success' });
-    }, 500);
+// Create a new group
+export const createGroup = async (groupData) => {
+  const response = await api.post('/groups', groupData);
+  return response.data;
+};
+
+// Update group details
+export const updateGroup = async (groupId, groupData) => {
+  const response = await api.put(`/groups/${groupId}`, groupData);
+  return response.data;
+};
+
+// Join a group
+export const joinGroup = async (groupId, username) => {
+  const response = await api.post(`/groups/${groupId}/join`, { username });
+  return response.data;
+};
+
+// Leave a group
+export const leaveGroup = async (groupId, username) => {
+  const response = await api.post(`/groups/${groupId}/leave`, { username });
+  return response.data;
+};
+
+// Get polls for a group
+export const getGroupPolls = async (groupId) => {
+  const response = await api.get(`/groups/${groupId}/polls`);
+  return response.data;
+};
+
+// Create a poll
+export const createPoll = async (groupId, pollData) => {
+  const response = await api.post(`/groups/${groupId}/polls`, pollData);
+  return response.data;
+};
+
+// Vote on a poll
+export const voteOnPoll = async (pollId, username, optionId) => {
+  const response = await api.post(`/polls/${pollId}/vote`, { 
+    username, 
+    option_id: optionId 
   });
+  return response.data;
 };

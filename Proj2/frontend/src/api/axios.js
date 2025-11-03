@@ -1,18 +1,19 @@
+
 import axios from 'axios';
 
-// Axios instance for all API calls
 const api = axios.create({
-    baseURL: 'https://jsonplaceholder.typicode.com', // Replace with your backend URL
+    baseURL: 'http://localhost:5000/api', // Flask backend URL
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Optional: intercept requests/responses for logging, auth tokens
 api.interceptors.request.use(
     config => {
-        // Example: add auth token if available
-        // config.headers.Authorization = `Bearer ${localStorage.getItem('token')}`;
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
         return config;
     },
     error => Promise.reject(error)
@@ -20,7 +21,10 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
     response => response,
-    error => Promise.reject(error)
+    error => {
+        console.error('API Error:', error.response?.data || error.message);
+        return Promise.reject(error);
+    }
 );
 
 export default api;

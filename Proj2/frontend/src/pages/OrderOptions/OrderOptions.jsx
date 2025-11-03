@@ -1,76 +1,162 @@
+// src/pages/OrderOptions/OrderOptions.jsx
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, Users, Zap, MapPin, TrendingDown, Leaf } from 'lucide-react';
-
-// Mock data for nearby pools
-const nearbyPools = [
-  {
-    id: 1,
-    restaurantName: "Pizza Palace",
-    restaurantEmoji: "🍕",
-    organizerName: "John D.",
-    currentMembers: 3,
-    maxMembers: 8,
-    timeRemaining: "12 min",
-    estimatedSavings: 4.50,
-    deliveryLocation: "Building A, Floor 3",
-    distance: "0.2 km"
-  },
-  {
-    id: 2,
-    restaurantName: "Pizza Palace",
-    restaurantEmoji: "🍕",
-    organizerName: "Sarah M.",
-    currentMembers: 5,
-    maxMembers: 10,
-    timeRemaining: "8 min",
-    estimatedSavings: 5.20,
-    deliveryLocation: "Main Campus Center",
-    distance: "0.4 km"
-  },
-  {
-    id: 3,
-    restaurantName: "Pizza Palace",
-    restaurantEmoji: "🍕",
-    organizerName: "Mike R.",
-    currentMembers: 2,
-    maxMembers: 6,
-    timeRemaining: "15 min",
-    estimatedSavings: 3.80,
-    deliveryLocation: "Library Building",
-    distance: "0.6 km"
-  }
-];
+import { createGroup, getAllGroups, joinGroup } from '../../api/groups';
 
 function OrderOptionsModal() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { cart, cartTotal, restaurant } = location.state || {};
+  
   const [selectedOption, setSelectedOption] = useState(null);
   const [poolTimeLimit, setPoolTimeLimit] = useState(15);
   const [maxMembers, setMaxMembers] = useState(8);
+  const [deliveryLocation, setDeliveryLocation] = useState('');
   const [selectedPool, setSelectedPool] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [nearbyPools, setNearbyPools] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  // Sample cart data
-  const cartTotal = 42.50;
+  const currentUser = 'Alice'; // Replace with actual logged-in user from auth context
   const deliveryFee = 5.99;
   const estimatedDeliveryTime = "30-40 min";
 
+  // Fetch nearby pools when user selects "Join Pool"
+  useEffect(() => {
+    if (selectedOption === 'join') {
+      fetchNearbyPools();
+    }
+  }, [selectedOption]);
+
+  const fetchNearbyPools = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const allGroups = await getAllGroups();
+      // Filter groups for the same restaurant that aren't full
+      const filtered = allGroups
+        .filter(g => g.restaurant_id === restaurant?.id && g.members.length < g.maxMembers)
+        .map(g => ({
+          id: g.id,
+          groupData: g, // Store full group data
+          restaurantName: restaurant.name,
+          restaurantEmoji: restaurant.image,
+          organizerName: g.organizer,
+          currentMembers: g.members.length,
+          maxMembers: g.maxMembers,
+          timeRemaining: calculateTimeRemaining(g.nextOrderTime),
+          estimatedSavings: (deliveryFee / Math.max(g.members.length + 1, 2)).toFixed(2),
+          deliveryLocation: g.deliveryLocation,
+          distance: "0.5 km" // Mock distance - can be calculated based on location later
+        }));
+      setNearbyPools(filtered);
+    } catch (error) {
+      console.error('Error fetching nearby pools:', error);
+      setError('Failed to load nearby pools');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateTimeRemaining = (nextOrderTime) => {
+    const now = new Date();
+    const orderTime = new Date(nextOrderTime);
+    const diff = orderTime - now;
+    
+    if (diff <= 0) return "Expired";
+    
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `${minutes} min`;
+    
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h ${minutes % 60}m`;
+  };
+
   const handleOrderNow = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleCreatePool = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
-  const handleJoinPool = (pool) => {
-    setSelectedPool(pool);
+    // Handle immediate order placement
+    console.log('Placing immediate order:', { cart, cartTotal, restaurant });
     setShowSuccess(true);
     setTimeout(() => {
-      setShowSuccess(false);
-      setSelectedPool(null);
-    }, 3000);
+      navigate('/dashboard');
+    }, 2000);
   };
+
+  const handleCreatePool = async () => {
+    if (!deliveryLocation.trim()) {
+      setError('Please enter a delivery location');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // Calculate next order time based on pool time limit
+      const nextOrderTime = new Date();
+      nextOrderTime.setMinutes(nextOrderTime.getMinutes() + poolTimeLimit);
+
+      const groupData = {
+        name: `${restaurant.name} Pool - ${currentUser}`,
+        organizer: currentUser,
+        restaurant_id: restaurant.id,
+        deliveryType: 'Split',
+        deliveryLocation: deliveryLocation,
+        nextOrderTime: nextOrderTime.toISOString(),
+        maxMembers: maxMembers
+      };
+
+      const newGroup = await createGroup(groupData);
+      console.log('Pool created successfully:', newGroup);
+      
+      setShowSuccess(true);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+    } catch (error) {
+      console.error('Error creating pool:', error);
+      setError(error.response?.data?.error || 'Failed to create pool');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinPool = async (pool) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      await joinGroup(pool.id, currentUser);
+      setSelectedPool(pool);
+      setShowSuccess(true);
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
+    } catch (error) {
+      console.error('Error joining pool:', error);
+      setError(error.response?.data?.error || 'Failed to join pool');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Guard clause if no cart data
+  if (!cart || !restaurant) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.modal}>
+          <div style={styles.header}>
+            <h2 style={styles.title}>No Order Data</h2>
+            <p style={styles.subtitle}>Please add items to cart first</p>
+          </div>
+          <button style={styles.confirmButton} onClick={() => navigate('/dashboard')}>
+            Go to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -96,6 +182,13 @@ function OrderOptionsModal() {
             <span style={styles.totalAmount}>${(cartTotal + deliveryFee).toFixed(2)}</span>
           </div>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div style={styles.errorMessage}>
+            {error}
+          </div>
+        )}
 
         {/* Options Grid */}
         {!selectedOption && (
@@ -166,7 +259,7 @@ function OrderOptionsModal() {
               </p>
               <div style={styles.optionBadge}>
                 <Users size={16} />
-                <span>{nearbyPools.length} pools nearby</span>
+                <span>Browse available pools</span>
               </div>
               <div style={styles.optionDetails}>
                 <div>Instant savings</div>
@@ -204,8 +297,12 @@ function OrderOptionsModal() {
                 </div>
               </div>
 
-              <button style={styles.confirmButton} onClick={handleOrderNow}>
-                Confirm & Place Order
+              <button 
+                style={styles.confirmButton} 
+                onClick={handleOrderNow}
+                disabled={loading}
+              >
+                {loading ? 'Processing...' : 'Confirm & Place Order'}
               </button>
             </div>
           </div>
@@ -225,6 +322,20 @@ function OrderOptionsModal() {
                 Set parameters for your pool. If no one joins within the time limit, your order will be placed automatically.
               </p>
               
+              <div style={styles.configSection}>
+                <label style={styles.label}>
+                  Delivery Location
+                  <span style={styles.labelHelper}>Where should the order be delivered?</span>
+                </label>
+                <input
+                  type="text"
+                  value={deliveryLocation}
+                  onChange={(e) => setDeliveryLocation(e.target.value)}
+                  placeholder="e.g., Building A, Floor 3"
+                  style={styles.input}
+                />
+              </div>
+
               <div style={styles.configSection}>
                 <label style={styles.label}>
                   Time Limit
@@ -280,8 +391,12 @@ function OrderOptionsModal() {
                 </div>
               </div>
 
-              <button style={{...styles.confirmButton, backgroundColor: '#059669'}} onClick={handleCreatePool}>
-                Create Pool & Wait
+              <button 
+                style={{...styles.confirmButton, backgroundColor: '#059669'}} 
+                onClick={handleCreatePool}
+                disabled={loading || !deliveryLocation.trim()}
+              >
+                {loading ? 'Creating Pool...' : 'Create Pool & Wait'}
               </button>
             </div>
           </div>
@@ -297,53 +412,71 @@ function OrderOptionsModal() {
             <h3 style={styles.sectionTitle}>Available Pools Nearby</h3>
             <p style={styles.sectionSubtitle}>Join a pool and save on delivery costs instantly</p>
 
-            <div style={styles.poolsList}>
-              {nearbyPools.map(pool => (
-                <div key={pool.id} style={styles.poolCard}>
-                  <div style={styles.poolHeader}>
-                    <div style={styles.poolRestaurant}>
-                      <span style={styles.restaurantEmoji}>{pool.restaurantEmoji}</span>
-                      <div>
-                        <div style={styles.poolRestaurantName}>{pool.restaurantName}</div>
-                        <div style={styles.poolOrganizer}>by {pool.organizerName}</div>
+            {loading ? (
+              <div style={styles.loadingMessage}>Loading available pools...</div>
+            ) : nearbyPools.length === 0 ? (
+              <div style={styles.emptyState}>
+                <p>No active pools found for {restaurant.name}</p>
+                <p style={{fontSize: '14px', color: '#6b7280', marginTop: '8px'}}>
+                  Be the first to create one!
+                </p>
+                <button 
+                  style={{...styles.confirmButton, marginTop: '16px'}}
+                  onClick={() => setSelectedOption('create')}
+                >
+                  Create a Pool
+                </button>
+              </div>
+            ) : (
+              <div style={styles.poolsList}>
+                {nearbyPools.map(pool => (
+                  <div key={pool.id} style={styles.poolCard}>
+                    <div style={styles.poolHeader}>
+                      <div style={styles.poolRestaurant}>
+                        <span style={styles.restaurantEmoji}>{pool.restaurantEmoji}</span>
+                        <div>
+                          <div style={styles.poolRestaurantName}>{pool.restaurantName}</div>
+                          <div style={styles.poolOrganizer}>by {pool.organizerName}</div>
+                        </div>
+                      </div>
+                      <div style={styles.timeRemaining}>
+                        <Clock size={16} />
+                        <span>{pool.timeRemaining}</span>
                       </div>
                     </div>
-                    <div style={styles.timeRemaining}>
-                      <Clock size={16} />
-                      <span>{pool.timeRemaining}</span>
+
+                    <div style={styles.poolStats}>
+                      <div style={styles.poolStat}>
+                        <Users size={16} color="#6b7280" />
+                        <span>{pool.currentMembers}/{pool.maxMembers} members</span>
+                      </div>
+                      <div style={styles.poolStat}>
+                        <MapPin size={16} color="#6b7280" />
+                        <span>{pool.distance}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div style={styles.poolStats}>
-                    <div style={styles.poolStat}>
-                      <Users size={16} color="#6b7280" />
-                      <span>{pool.currentMembers}/{pool.maxMembers} members</span>
+                    <div style={styles.poolLocation}>
+                      <MapPin size={14} />
+                      <span>{pool.deliveryLocation}</span>
                     </div>
-                    <div style={styles.poolStat}>
-                      <MapPin size={16} color="#6b7280" />
-                      <span>{pool.distance}</span>
+
+                    <div style={styles.poolSavings}>
+                      <TrendingDown size={18} color="#059669" />
+                      <span>Save ${pool.estimatedSavings} on delivery</span>
                     </div>
-                  </div>
 
-                  <div style={styles.poolLocation}>
-                    <MapPin size={14} />
-                    <span>{pool.deliveryLocation}</span>
+                    <button 
+                      style={styles.joinPoolButton}
+                      onClick={() => handleJoinPool(pool)}
+                      disabled={loading}
+                    >
+                      {loading ? 'Joining...' : 'Join This Pool'}
+                    </button>
                   </div>
-
-                  <div style={styles.poolSavings}>
-                    <TrendingDown size={18} color="#059669" />
-                    <span>Save ${pool.estimatedSavings.toFixed(2)} on delivery</span>
-                  </div>
-
-                  <button 
-                    style={styles.joinPoolButton}
-                    onClick={() => handleJoinPool(pool)}
-                  >
-                    Join This Pool
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -360,7 +493,7 @@ function OrderOptionsModal() {
               <p style={styles.successText}>
                 {selectedOption === 'now' && 'Your order is being prepared and will be delivered soon.'}
                 {selectedOption === 'create' && `Waiting for others to join. Order will auto-place in ${poolTimeLimit} min.`}
-                {selectedOption === 'join' && 'You\'re now part of this pool. Order will be placed when ready.'}
+                {selectedOption === 'join' && 'You\'re now part of this pool. Redirecting to dashboard...'}
               </p>
             </div>
           </div>
@@ -430,6 +563,14 @@ const styles = {
     fontWeight: 'bold',
     color: '#2563eb'
   },
+  errorMessage: {
+    margin: '20px 32px',
+    padding: '12px 16px',
+    background: '#fee2e2',
+    color: '#b91c1c',
+    borderRadius: '8px',
+    fontSize: '14px'
+  },
   optionsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
@@ -443,12 +584,7 @@ const styles = {
     padding: '24px',
     cursor: 'pointer',
     transition: 'all 0.3s',
-    position: 'relative',
-    ':hover': {
-      borderColor: '#2563eb',
-      transform: 'translateY(-4px)',
-      boxShadow: '0 8px 20px rgba(37,99,235,0.15)'
-    }
+    position: 'relative'
   },
   recommendedCard: {
     borderColor: '#059669',
@@ -590,6 +726,14 @@ const styles = {
     fontWeight: '400',
     color: '#6b7280'
   },
+  input: {
+    width: '100%',
+    padding: '12px',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    fontSize: '16px',
+    boxSizing: 'border-box'
+  },
   sliderContainer: {
     background: 'white',
     padding: '16px',
@@ -645,6 +789,19 @@ const styles = {
     fontSize: '16px',
     color: '#6b7280',
     marginBottom: '24px'
+  },
+  loadingMessage: {
+    textAlign: 'center',
+    padding: '40px',
+    fontSize: '16px',
+    color: '#6b7280'
+  },
+  emptyState: {
+    textAlign: 'center',
+    padding: '40px',
+    background: '#f9fafb',
+    borderRadius: '12px',
+    marginTop: '20px'
   },
   poolsList: {
     display: 'grid',

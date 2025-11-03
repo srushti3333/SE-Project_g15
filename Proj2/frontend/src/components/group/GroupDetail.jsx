@@ -1,25 +1,37 @@
+// src/components/group/GroupDetail.jsx
 import React, { useEffect, useState } from 'react';
 import Button from '../common/Button/Button';
 import './GroupDetail.css';
 import MenuItemCard from '../restaurant/MenuItemCard';
 import { useCart } from '../../context/CartContext';
-import { RESTAURANTS, GROUP_POLLS } from '../../utils/constants';
+import { RESTAURANTS } from '../../utils/constants';
+import { getGroupPolls, voteOnPoll } from '../../api/groups';
 
 const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
-  const [polls, setPolls] = useState(GROUP_POLLS[group.id] || []);
+  const [polls, setPolls] = useState([]);
   const [showPolls, setShowPolls] = useState(false);
-  const [selectedPoll, setSelectedPoll] = useState(null);
-  const currentUser = "Alice"; // <- replace later with logged user
-  const [orderItems, setOrderItems] = useState([]);
   const [timeLeft, setTimeLeft] = useState('');
+  const [loading, setLoading] = useState(false);
   const { addToCart } = useCart();
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  
+  const currentUser = "Alice"; // Replace with actual logged-in user
 
+  // Fetch polls when component mounts or showPolls changes
+  useEffect(() => {
+    if (showPolls && group?.id) {
+      fetchPolls();
+    }
+  }, [showPolls, group?.id]);
+
+  // Setup countdown timer
   useEffect(() => {
     if (!group?.nextOrderTime) return;
+    
     const interval = setInterval(() => {
       const now = new Date();
       const distance = new Date(group.nextOrderTime) - now;
+      
       if (distance <= 0) {
         setTimeLeft('00:00:00');
         clearInterval(interval);
@@ -33,17 +45,42 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
       }
     }, 1000);
 
+    return () => clearInterval(interval);
+  }, [group?.nextOrderTime]);
+
+  // Load restaurant data
+  useEffect(() => {
     if (group?.restaurant_id) {
       const restaurant = RESTAURANTS.find(r => r.id === group.restaurant_id);
-      console.log("Selected Restaurant:", restaurant);
       setSelectedRestaurant(restaurant);
     }
+  }, [group?.restaurant_id]);
 
+  const fetchPolls = async () => {
+    setLoading(true);
+    try {
+      const pollsData = await getGroupPolls(group.id);
+      setPolls(pollsData);
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+      alert('Failed to load polls');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
-    return () => clearInterval(interval);
-  }, [group]);
-
+  const handleVote = async (poll, optionIndex) => {
+    try {
+      const optionId = poll.options[optionIndex].id || optionIndex; // Fallback to index if no ID
+      await voteOnPoll(poll.id, currentUser, optionId);
+      
+      // Refresh polls to show updated votes
+      await fetchPolls();
+    } catch (error) {
+      console.error('Error voting on poll:', error);
+      alert(error.response?.data?.error || 'Failed to vote');
+    }
+  };
 
   if (!group) return null;
 
@@ -52,36 +89,19 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
     const max = group.maxMembers || 10;
     const now = new Date();
     const orderTime = new Date(group.nextOrderTime);
+    
     if (membersCount >= max) return 'Full';
     if ((orderTime - now) / 60000 <= 15) return 'Closing soon';
     return 'Open';
   };
 
-  const handleVote = (pollId, optionIndex) => {
-    setPolls(prev => prev.map(p => {
-      if (p.id !== pollId) return p;
-
-      const updatedOptions = p.options.map((opt, i) => {
-        let votes = opt.votes;
-
-        // If user already voted this option, decrement previous vote
-        if (p.votedUsers.includes(currentUser) && i === p.userVotedIndex) {
-          votes -= 1;
-        }
-
-        // Increment new vote
-        if (i === optionIndex) votes += 1;
-
-        return { ...opt, votes };
-      });
-
-      return {
-        ...p,
-        options: updatedOptions,
-        votedUsers: [...new Set([...p.votedUsers, currentUser])],
-        userVotedIndex: optionIndex // track which option the user selected
-      };
-    }));
+  const getUserVotedOption = (poll) => {
+    if (!poll.votedUsers || !poll.votedUsers.includes(currentUser)) {
+      return -1;
+    }
+    // Find which option the user voted for
+    // This requires additional backend logic to track user votes per option
+    return -1; // For now, return -1
   };
 
   return (
@@ -119,19 +139,30 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
         </div>
       </div>
 
-
       {/* Info */}
-      <p className="group-detail-info"><strong>Restaurant:</strong> {selectedRestaurant?.name || "Loading..."}</p>
-      <p className="group-detail-info"><strong>Organizer:</strong> {group.organizer}</p>
+      <p className="group-detail-info">
+        <strong>Restaurant:</strong> {selectedRestaurant?.name || "Loading..."}
+      </p>
+      <p className="group-detail-info">
+        <strong>Organizer:</strong> {group.organizer}
+      </p>
       <p className="group-detail-info">
         <strong>Members:</strong>{' '}
         {Array.isArray(group.members) ? group.members.join(', ') : group.members} (
-        {Array.isArray(group.members) ? group.members.length : 0})
+        {Array.isArray(group.members) ? group.members.length : 0}/{group.maxMembers})
       </p>
-      <p className="group-detail-info"><strong>Delivery Type:</strong> {group.deliveryType}</p>
-      <p className="group-detail-info"><strong>Next Order:</strong> {new Date(group.nextOrderTime).toLocaleString()}</p>
-      <p className="group-detail-info"><strong>Delivery Location:</strong> {group.deliveryLocation}</p>
-      <p className="group-detail-info"><strong>Countdown:</strong> {timeLeft}</p>
+      <p className="group-detail-info">
+        <strong>Delivery Type:</strong> {group.deliveryType}
+      </p>
+      <p className="group-detail-info">
+        <strong>Next Order:</strong> {new Date(group.nextOrderTime).toLocaleString()}
+      </p>
+      <p className="group-detail-info">
+        <strong>Delivery Location:</strong> {group.deliveryLocation}
+      </p>
+      <p className="group-detail-info">
+        <strong>Countdown:</strong> {timeLeft}
+      </p>
 
       {/* Menu */}
       <h3 className="menu-title">Menu Items</h3>
@@ -150,7 +181,7 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
       )}
 
       {/* Toggle Polls Visibility */}
-      <div style={{ margin: '10px 0' }}>
+      <div style={{ margin: '20px 0' }}>
         <Button
           variant="secondary"
           onClick={() => setShowPolls(prev => !prev)}
@@ -160,58 +191,78 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
       </div>
 
       {/* Polls */}
-      <h3 className="poll-title">Group Polls</h3>
       {showPolls && (
         <div className="poll-section">
-          {polls.length === 0 && <p>No polls yet.</p>}
+          <h3 className="poll-title">Group Polls</h3>
+          
+          {loading ? (
+            <p>Loading polls...</p>
+          ) : polls.length === 0 ? (
+            <p>No polls yet. Create one to get started!</p>
+          ) : (
+            polls.map(poll => {
+              const userVotedIndex = getUserVotedOption(poll);
+              
+              return (
+                <div key={poll.id} className="poll-card">
+                  <p className="poll-question">{poll.question}</p>
+                  <p className="poll-meta">
+                    Created by {poll.createdBy} on {new Date(poll.createdOn).toLocaleString()}
+                  </p>
 
-          {polls.map(poll => (
-            <div key={poll.id} className="poll-card">
-              <p>{poll.question}</p>
-              <p>Created By: {poll.createdBy} on {new Date(poll.createdOn).toLocaleString()}</p>
+                  <div className="poll-options">
+                    {poll.options.map((opt, i) => (
+                      <button
+                        key={i}
+                        className={`poll-option ${userVotedIndex === i ? "selected" : ""}`}
+                        onClick={() => handleVote(poll, i)}
+                      >
+                        <span className="poll-option-text">{opt.text}</span>
+                        <span className="poll-option-votes">{opt.votes} votes</span>
+                      </button>
+                    ))}
+                  </div>
 
-              {poll.options.map((opt, i) => (
-                <button
-                  key={i}
-                  className={`poll-option ${poll.userVotedIndex === i ? "selected" : ""}`}
-                  onClick={() => handleVote(poll.id, i)}
-                >
-                  {opt.text} — {opt.votes} votes
-                </button>
-              ))}
-            </div>
-          ))}
+                  {poll.votedUsers && poll.votedUsers.length > 0 && (
+                    <p className="poll-voters">
+                      Voted: {poll.votedUsers.join(', ')}
+                    </p>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       )}
 
-
       {/* Actions */}
-
-      {/* Create a poll */}
       <div className="group-detail-actions">
         <Button
           variant="primary"
           onClick={() => onCreatePoll(group)}
-          style={{ marginTop: '10px' }}
         >
           Create Poll
         </Button>
-        <Button variant="success" onClick={() => alert('Place order')}>
+        
+        <Button variant="success" onClick={() => alert('Place order functionality coming soon!')}>
           Place Order
         </Button>
 
-        {/*Show Edit button only for group owner */}
-        {group.organizer === "Alice" && (
+        {/* Show Edit button only for group owner */}
+        {group.organizer === currentUser && (
           <Button
             variant="primary"
             onClick={() => onEditGroup(group)}
-            style={{ marginTop: '10px' }}
           >
             Edit Group
           </Button>
-
         )}
-        {onClose && <Button variant="secondary" onClick={onClose}>Close</Button>}
+        
+        {onClose && (
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
+        )}
       </div>
     </div>
   );
