@@ -1,18 +1,18 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// src/App.jsx
 
-import Login from './pages/Login/Login'
-import SignUp from './pages/SignUp/SignUp'
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { CartProvider } from './context/CartContext';
+import AppRoutes from './routes/AppRoutes';
+import './App.css';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-
-      </Routes>
-    </Router>
+    <BrowserRouter>
+      <CartProvider>
+        <AppRoutes />
+      </CartProvider>
+    </BrowserRouter>
   );
 }
 
