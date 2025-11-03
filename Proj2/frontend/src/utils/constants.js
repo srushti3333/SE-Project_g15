@@ -1,4 +1,6 @@
 // src/utils/constants.js
+// API base URL
+export const API_BASE_URL = "http://localhost:5000/api";
 
 // Mock restaurant data
 export const RESTAURANTS = [
