@@ -11,6 +11,16 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
+    # Profile fields
+    full_name = db.Column(db.String(150))
+    phone = db.Column(db.String(20))
+
+    # Address fields
+    street = db.Column(db.String(255))
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    pincode = db.Column(db.String(20))
+
     def __init__(self, username, email, password):
         self.username = username
         self.email = email
