@@ -24,3 +24,9 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
+
+backend/__pycache__
+backend/.pytest_cache
+*/__pycache__/*
+
+*/migrations/*

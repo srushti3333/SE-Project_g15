@@ -45,6 +45,7 @@ backend/.env
 backend/__pycache__/
 backend/.pytest_cache/
 */__pycache__/*
+backend/migrations/*
 
 # === Misc ===
 *.bak

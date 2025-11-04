@@ -12,14 +12,15 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
 
     # Profile fields
-    full_name = db.Column(db.String(150))
-    phone = db.Column(db.String(20))
+    full_name = db.Column(db.String(150), nullable=True)
+    phone = db.Column(db.String(20), nullable=True)
+    profile_picture = db.Column(db.String(255), nullable=True)
 
     # Address fields
-    street = db.Column(db.String(255))
-    city = db.Column(db.String(100))
-    state = db.Column(db.String(100))
-    pincode = db.Column(db.String(20))
+    street = db.Column(db.String(255), nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    state = db.Column(db.String(100), nullable=True)
+    pincode = db.Column(db.String(20), nullable=True)
 
     def __init__(self, username, email, password):
         self.username = username
