@@ -19,18 +19,35 @@ const validateSignup = (values) => {
     errors.password = 'Password must be at least 6 characters';
   }
 
+  if (!values.username.trim()) {
+    errors.username = 'Username is required';
+  }
+
+  if (!values.email.trim()) {
+    errors.email = 'Email is required';
+  }
+
   return errors;
 };
 
 const SignUp = () => {
   const navigate = useNavigate();
 
-  const { values, errors, loading, handleChange, handleSubmit, setErrors, setLoading, reset } = useForm(
+  const {
+    values,
+    errors,
+    loading,
+    handleChange,
+    handleSubmit,
+    setErrors,
+    setLoading,
+    reset,
+  } = useForm(
     {
       username: '',
       email: '',
       password: '',
-      confirmPassword: ''
+      confirmPassword: '',
     },
     validateSignup
   );
@@ -54,19 +71,11 @@ const SignUp = () => {
     }
   };
 
-
-  const isFormValid =
-    values.username.trim() !== '' &&
-    values.email.trim() !== '' &&
-    values.password.trim() !== '' &&
-    values.confirmPassword.trim() !== '' &&
-    values.password === values.confirmPassword;
-
   return (
     <div className="signup-container">
       <h1>Sign Up</h1>
 
-      <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
+      <form className="signup-form" onSubmit={handleSubmit(onSubmit)} role="form">
         <Input
           type="text"
           name="username"
@@ -112,7 +121,7 @@ const SignUp = () => {
           variant="primary"
           size="large"
           fullWidth
-          disabled={!isFormValid}
+          disabled={loading} // only disable when loading
           loading={loading}
         >
           Sign Up
@@ -123,10 +132,7 @@ const SignUp = () => {
 
       <div className="login-section">
         <p>Already have an account?</p>
-        <Button
-          variant="secondary"
-          onClick={() => navigate('/login')}
-        >
+        <Button variant="secondary" onClick={() => navigate('/login')}>
           Login
         </Button>
       </div>
