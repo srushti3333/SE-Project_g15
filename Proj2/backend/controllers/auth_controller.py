@@ -36,3 +36,14 @@ def login_user():
 
     token = create_access_token(identity={'id': user.id, 'username': user.username})
     return jsonify({'token': token, 'username': user.username}), 200
+
+def test_register_user(client):
+    response = client.post('/api/auth/register', json={
+        "username": "testuser",
+        "email": "test@example.com",
+        "password": "testpass",
+        "full_name": "Test User",  # add these if required
+        "phone": "1234567890"
+    })
+    print(response.get_json())  # Optional: debug output
+    assert response.status_code in [200, 201]
