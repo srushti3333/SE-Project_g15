@@ -10,8 +10,8 @@ const CreatePollPage = ({ group, onBack }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const currentUser = 'Alice'; // Replace with actual logged-in user
-
+  // const currentUser = 'Alice'; // Replace with actual logged-in user
+  const currentUser = localStorage.getItem('username') || "Guest";
   const handleAddOption = () => {
     setOptions([...options, ""]);
   };

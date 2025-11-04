@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from datetime import datetime
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from extensions import db
 from models import Group, GroupMember
 from . import bp
@@ -13,11 +14,14 @@ def get_all_groups():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# Get user's groups
+# Get user's groups - NOW WITH JWT
 @bp.route('/groups/my-groups', methods=['GET'])
+@jwt_required()
 def get_user_groups():
     try:
-        username = request.args.get('username', 'Alice')
+        claims = get_jwt()
+        username = claims.get('username')  # Get username from JWT token
+        
         member_records = GroupMember.query.filter_by(username=username).all()
         group_ids = [m.group_id for m in member_records]
         groups = Group.query.filter(Group.id.in_(group_ids)).all()
@@ -27,6 +31,7 @@ def get_user_groups():
 
 # Get specific group
 @bp.route('/groups/<int:group_id>', methods=['GET'])
+@jwt_required()
 def get_group_detail(group_id):
     try:
         group = Group.query.get_or_404(group_id)
@@ -34,14 +39,18 @@ def get_group_detail(group_id):
     except Exception as e:
         return jsonify({'error': str(e)}), 404
 
-# Create group
+# Create group - NOW WITH JWT
 @bp.route('/groups', methods=['POST'])
+@jwt_required()
 def create_group():
     try:
+        claims = get_jwt()
+        username = claims.get('username')  # Get organizer from JWT token
+        
         data = request.json
         new_group = Group(
             name=data['name'],
-            organizer=data['organizer'],
+            organizer=username,  # Use authenticated user
             restaurant_id=data['restaurant_id'],
             delivery_type=data['deliveryType'],
             delivery_location=data['deliveryLocation'],
@@ -51,7 +60,7 @@ def create_group():
         db.session.add(new_group)
         db.session.flush()
         
-        member = GroupMember(group_id=new_group.id, username=data['organizer'])
+        member = GroupMember(group_id=new_group.id, username=username)
         db.session.add(member)
         db.session.commit()
         
@@ -62,9 +71,18 @@ def create_group():
 
 # Update group
 @bp.route('/groups/<int:group_id>', methods=['PUT'])
+@jwt_required()
 def update_group(group_id):
     try:
+        claims = get_jwt()
+        username = claims.get('username')
+        
         group = Group.query.get_or_404(group_id)
+        
+        # Only organizer can update
+        if group.organizer != username:
+            return jsonify({'error': 'Only organizer can update group'}), 403
+        
         data = request.json
         
         if 'name' in data:
@@ -86,12 +104,13 @@ def update_group(group_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
-# Join group
+# Join group - NOW WITH JWT
 @bp.route('/groups/<int:group_id>/join', methods=['POST'])
+@jwt_required()
 def join_group(group_id):
     try:
-        data = request.json
-        username = data['username']
+        claims = get_jwt()
+        username = claims.get('username')  # Get username from JWT
         
         group = Group.query.get_or_404(group_id)
         
@@ -112,12 +131,19 @@ def join_group(group_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 400
 
-# Leave group
+# Leave group - NOW WITH JWT
 @bp.route('/groups/<int:group_id>/leave', methods=['POST'])
+@jwt_required()
 def leave_group(group_id):
     try:
-        data = request.json
-        username = data['username']
+        claims = get_jwt()
+        username = claims.get('username')  # Get username from JWT
+        
+        group = Group.query.get_or_404(group_id)
+        
+        # Prevent organizer from leaving
+        if group.organizer == username:
+            return jsonify({'error': 'Organizer cannot leave group. Delete the group instead.'}), 400
         
         member = GroupMember.query.filter_by(group_id=group_id, username=username).first()
         if not member:

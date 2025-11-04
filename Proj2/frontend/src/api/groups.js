@@ -6,9 +6,15 @@ export const getAllGroups = async () => {
   return response.data;
 };
 
+// // Get user's groups
+// export const getUserGroups = async (username = 'Alice') => {
+//   const response = await api.get(`/groups/my-groups?username=${username}`);
+//   return response.data;
+// };
+
 // Get user's groups
-export const getUserGroups = async (username = 'Alice') => {
-  const response = await api.get(`/groups/my-groups?username=${username}`);
+export const getUserGroups = async () => {
+  const response = await api.get(`/groups/my-groups`);
   return response.data;
 };
 

@@ -3,7 +3,7 @@ from flask import request, jsonify, current_app, url_for
 from werkzeug.utils import secure_filename
 from models.user import User
 from extensions import db
-from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import get_jwt
 
 # Allowed file extensions for profile pictures
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -14,16 +14,15 @@ def allowed_file(filename):
 
 def get_profile():
     """Fetch the logged-in user's profile."""
-    user_data = get_jwt_identity()
-    user_id = int(user_data) if isinstance(user_data, str) else user_data
-    user = User.query.get(user_id)
+    claims = get_jwt()
+    username = claims.get('username')
+    user = User.query.filter_by(username=username).first()
 
     if not user:
         return jsonify({"message": "User not found"}), 404
 
     profile_picture_url = None
     if user.profile_picture:
-        # Build full URL for frontend
         profile_picture_url = url_for(
             'uploaded_file',
             filename=os.path.basename(user.profile_picture),
@@ -45,9 +44,9 @@ def get_profile():
 
 def update_profile():
     """Update the logged-in user's profile and optionally upload a profile picture."""
-    user_data = get_jwt_identity()
-    user_id = int(user_data) if isinstance(user_data, str) else user_data
-    user = User.query.get(user_id)
+    claims = get_jwt()
+    username = claims.get('username')
+    user = User.query.filter_by(username=username).first()
 
     if not user:
         return jsonify({"message": "User not found"}), 404

@@ -22,8 +22,17 @@ const Login = () => {
       const data = await response;
       
       console.log('API response:', data);
-      alert('Login successful!');
-      navigate('/dashboard');
+      
+      // Store token and username in localStorage
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('username', data.username);
+        
+        alert('Login successful!');
+        navigate('/dashboard');
+      } else {
+        throw new Error('No token received');
+      }
     } catch (err) {
       console.error('Login error:', err);
       setErrors({ submit: 'Login failed. Please try again.' });

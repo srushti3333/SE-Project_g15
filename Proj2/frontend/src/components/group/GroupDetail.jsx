@@ -15,7 +15,7 @@ const GroupDetail = ({ group, onClose, onEditGroup, onCreatePoll }) => {
   const { addToCart } = useCart();
   const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   
-  const currentUser = "Alice"; // Replace with actual logged-in user
+  const currentUser = localStorage.getItem('username') || "Guest"; // Replace with actual logged-in user
 
   // Fetch polls when component mounts or showPolls changes
   useEffect(() => {
