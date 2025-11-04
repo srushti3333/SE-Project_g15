@@ -8,7 +8,7 @@ import Dashboard from '../pages/Dashboard/Dashboard';
 import OrderOptions from '../pages/OrderOptions/OrderOptions';
 import GroupsPage from '../components/group/GroupPage';
 import GroupDetailPage from '../components/group/GroupDetail';
-
+import Profile from '../pages/Profile/Profile';
 const AppRoutes = () => {
   return (
     <Routes>
@@ -19,6 +19,7 @@ const AppRoutes = () => {
       <Route path="/order-options" element={<OrderOptions />} />
       <Route path="/groups" element={<GroupsPage />} />
       <Route path="/groups/:id" element={<GroupDetailPage />} />
+      <Route path="/profile" element={<Profile />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
