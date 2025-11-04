@@ -1,5 +1,5 @@
 from flask import Flask
-from extensions import db, cors
+from extensions import db, cors, jwt
 from routes import bp as api_bp
 from config import Config
 
@@ -9,10 +9,13 @@ def create_app():
     # Load DB config from env / config.py
     app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
+    app.config['JWT_SECRET_KEY'] = Config.JWT_SECRET_KEY
+
     # Initialize extensions
     db.init_app(app)
-    cors.init_app(app)
+    cors.init_app(app, resources={r"/api/*": {"origins": "http://localhost:3000"}}, 
+        supports_credentials=True)
+    jwt.init_app(app)
     
     # Register blueprints
     app.register_blueprint(api_bp)

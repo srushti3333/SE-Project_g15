@@ -19,7 +19,7 @@ const Login = () => {
   const onSubmit = async (formValues) => {
     try {
       const response = await loginUser(formValues.username, formValues.password);
-      const data = await response.json();
+      const data = await response;
       
       console.log('API response:', data);
       alert('Login successful!');

@@ -10,21 +10,21 @@ import './SignUp.css';
 
 const validateSignup = (values) => {
   const errors = {};
-  
+
   if (values.password !== values.confirmPassword) {
     errors.confirmPassword = 'Passwords do not match!';
   }
-  
+
   if (values.password.length < 6) {
     errors.password = 'Password must be at least 6 characters';
   }
-  
+
   return errors;
 };
 
 const SignUp = () => {
   const navigate = useNavigate();
-  
+
   const { values, errors, loading, handleChange, handleSubmit, setErrors, setLoading, reset } = useForm(
     {
       username: '',
@@ -37,36 +37,35 @@ const SignUp = () => {
 
   const onSubmit = async (formValues) => {
     try {
-      const response = await signupUser(
+      const data = await signupUser(
         formValues.username,
         formValues.email,
         formValues.password
       );
-      
-      const data = await response.json();
+
       console.log('Signup response:', data);
-      
       alert('Signup successful! You can now login.');
       reset();
       navigate('/login');
     } catch (err) {
       console.error('Signup error:', err);
-      setErrors({ submit: 'Signup failed. Please try again.' });
+      setErrors({ submit: err.message || 'Signup failed. Please try again.' });
       setLoading(false);
     }
   };
 
-  const isFormValid = 
-    values.username.trim() !== '' && 
-    values.email.trim() !== '' && 
-    values.password.trim() !== '' && 
+
+  const isFormValid =
+    values.username.trim() !== '' &&
+    values.email.trim() !== '' &&
+    values.password.trim() !== '' &&
     values.confirmPassword.trim() !== '' &&
     values.password === values.confirmPassword;
 
   return (
     <div className="signup-container">
       <h1>Sign Up</h1>
-      
+
       <form className="signup-form" onSubmit={handleSubmit(onSubmit)}>
         <Input
           type="text"
@@ -77,7 +76,7 @@ const SignUp = () => {
           error={errors.username}
           required
         />
-        
+
         <Input
           type="email"
           name="email"
@@ -87,7 +86,7 @@ const SignUp = () => {
           error={errors.email}
           required
         />
-        
+
         <Input
           type="password"
           name="password"
@@ -97,7 +96,7 @@ const SignUp = () => {
           error={errors.password}
           required
         />
-        
+
         <Input
           type="password"
           name="confirmPassword"
