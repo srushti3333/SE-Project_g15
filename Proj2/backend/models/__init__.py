@@ -1,4 +1,5 @@
 from .group import Group, GroupMember
 from .poll import Poll, PollOption, PollVote
+from .user import User
 
-__all__ = ['Group', 'GroupMember', 'Poll', 'PollOption', 'PollVote']
+__all__ = ['User', 'Group', 'GroupMember', 'Poll', 'PollOption', 'PollVote']

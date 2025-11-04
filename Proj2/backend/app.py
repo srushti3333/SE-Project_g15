@@ -1,12 +1,13 @@
 from flask import Flask
 from extensions import db, cors
 from routes import bp as api_bp
+from config import Config
 
 def create_app():
     app = Flask(__name__)
     
-    # Database Configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:srushti@localhost:5432/foodpool'
+    # Load DB config from env / config.py
+    app.config['SQLALCHEMY_DATABASE_URI'] = Config.SQLALCHEMY_DATABASE_URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # Initialize extensions

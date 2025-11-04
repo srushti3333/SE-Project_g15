@@ -1,5 +1,6 @@
 from flask import jsonify, request
-from models import db, User
+from models import User
+from extensions import db
 from flask_jwt_extended import create_access_token
 
 def register_user():
