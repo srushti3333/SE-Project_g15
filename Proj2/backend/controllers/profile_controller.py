@@ -15,7 +15,8 @@ def allowed_file(filename):
 def get_profile():
     """Fetch the logged-in user's profile."""
     user_data = get_jwt_identity()
-    user = User.query.get(user_data['id'])
+    user_id = int(user_data) if isinstance(user_data, str) else user_data
+    user = User.query.get(user_id)
 
     if not user:
         return jsonify({"message": "User not found"}), 404
@@ -45,7 +46,8 @@ def get_profile():
 def update_profile():
     """Update the logged-in user's profile and optionally upload a profile picture."""
     user_data = get_jwt_identity()
-    user = User.query.get(user_data['id'])
+    user_id = int(user_data) if isinstance(user_data, str) else user_data
+    user = User.query.get(user_id)
 
     if not user:
         return jsonify({"message": "User not found"}), 404
