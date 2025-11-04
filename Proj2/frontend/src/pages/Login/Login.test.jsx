@@ -3,6 +3,8 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Login from './Login';
 import * as api from '../../api/auth';
+import '@testing-library/jest-dom';
+
 
 // Mock navigate
 const mockNavigate = jest.fn();
