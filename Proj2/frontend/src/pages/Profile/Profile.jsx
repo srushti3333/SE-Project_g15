@@ -1,13 +1,15 @@
 // src/pages/Profile/Profile.jsx
 import React, { useEffect, useState } from "react";
 import { fetchProfile, updateProfile } from "../../api/profile";
-import Navbar from "../../components/common/Navbar/Navbar"; // ✅ add this import
+import Navbar from "../../components/common/Navbar/Navbar";
+import { useNavigate } from "react-router-dom"; // ✅ for redirect after logout
 import "./Profile.css";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const navigate = useNavigate(); // ✅ navigation hook
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -37,12 +39,20 @@ const Profile = () => {
     }
   };
 
+  // ✅ Logout logic
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    alert("You have been logged out.");
+    navigate("/login");
+  };
+
   if (!profile) return <div className="profile">Loading profile...</div>;
 
   return (
     <>
-      {/* ✅ Add Navbar but skip the props (safe mode for Profile page) */}
-      <Navbar currentPage="profile"/>
+      {/* Navbar at top */}
+      <Navbar currentPage="profile" />
 
       <div className="profile-container">
         <div className="profile-card">
@@ -100,6 +110,11 @@ const Profile = () => {
             <li>Sushi House - $850</li>
             <li>Burger Point - $320</li>
           </ul>
+
+          {/* ✅ Logout Button */}
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
     </>
