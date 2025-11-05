@@ -23,8 +23,8 @@ global.localStorage = localStorageMock;
 // ------------------------
 const mockAddToCart = jest.fn();
 jest.mock("../../context/CartContext.jsx", () => ({
-    useCart: () => ({ addToCart: mockAddToCart }),
-    __esModule: true,
+  useCart: () => ({ addToCart: mockAddToCart }),
+  __esModule: true,
 }));
 
 // ------------------------
@@ -36,21 +36,21 @@ const mockGetGroupDetails = jest.fn();
 const mockJoinGroup = jest.fn();
 
 jest.mock("../../api/groups", () => ({
-    getUserGroups: (username) => mockGetUserGroups(username),
-    getAllGroups: () => mockGetAllGroups(),
-    getGroupDetails: (id) => mockGetGroupDetails(id),
-    joinGroup: (id, username) => mockJoinGroup(id, username),
+  getUserGroups: (username) => mockGetUserGroups(username),
+  getAllGroups: () => mockGetAllGroups(),
+  getGroupDetails: (id) => mockGetGroupDetails(id),
+  joinGroup: (id, username) => mockJoinGroup(id, username),
 }));
 
 // ------------------------
 // Mock Navbar and CartSidebar
 // ------------------------
 jest.mock("../../components/common/Navbar/Navbar", () => ({ currentPage, onPageChange }) => (
-    <div data-testid="navbar">
-        <button onClick={() => onPageChange("home")}>Home</button>
-        <button onClick={() => onPageChange("mygroups")}>My Groups</button>
-        <button onClick={() => onPageChange("findgroups")}>Find Groups</button>
-    </div>
+  <div data-testid="navbar">
+    <button onClick={() => onPageChange("home")}>Home</button>
+    <button onClick={() => onPageChange("mygroups")}>My Groups</button>
+    <button onClick={() => onPageChange("findgroups")}>Find Groups</button>
+  </div>
 ));
 
 jest.mock("../../components/common/Cart/CartSidebar", () => () => <div data-testid="cart-sidebar" />);
@@ -59,38 +59,38 @@ jest.mock("../../components/common/Cart/CartSidebar", () => () => <div data-test
 // Mock constants - Use the actual PAGES values from constants.js
 // ------------------------
 jest.mock("../../utils/constants", () => ({
-    RESTAURANTS: [
-        {
-            id: 1,
-            name: "Test Restaurant 1",
-            image: "🍔",
-            rating: 4.5,
-            location: "Test City",
-            offers: "10% off",
-            items: [
-                { id: "item1", name: "Burger", price: 10 },
-                { id: "item2", name: "Fries", price: 5 }
-            ]
-        },
-        {
-            id: 2,
-            name: "Test Restaurant 2",
-            image: "🍕",
-            rating: 4.0,
-            location: "Test Town",
-            offers: "Free Drink",
-            items: [
-                { id: "item3", name: "Pizza", price: 12 },
-            ]
-        }
-    ],
-    PAGES: {
-        HOME: "home",
-        MY_GROUPS: "mygroups",
-        FIND_GROUPS: "findgroups",
-        EDIT_GROUP: "editgroup",
-        CREATE_POLL: "createpoll"
+  RESTAURANTS: [
+    {
+      id: 1,
+      name: "Test Restaurant 1",
+      image: "🍔",
+      rating: 4.5,
+      location: "Test City",
+      offers: "10% off",
+      items: [
+        { id: "item1", name: "Burger", price: 10 },
+        { id: "item2", name: "Fries", price: 5 }
+      ]
+    },
+    {
+      id: 2,
+      name: "Test Restaurant 2",
+      image: "🍕",
+      rating: 4.0,
+      location: "Test Town",
+      offers: "Free Drink",
+      items: [
+        { id: "item3", name: "Pizza", price: 12 },
+      ]
     }
+  ],
+  PAGES: {
+    HOME: "home",
+    MY_GROUPS: "mygroups",
+    FIND_GROUPS: "findgroups",
+    EDIT_GROUP: "editgroup",
+    CREATE_POLL: "createpoll"
+  }
 }));
 
 jest.mock("../../components/group/GroupCard", () => ({ group, onAction, actionLabel }) => (
@@ -115,8 +115,8 @@ jest.mock("../../components/restaurant/MenuItemCard", () => ({ item, onAddToCart
 ));
 
 jest.mock("../../components/common/Button/Button", () => ({ children, onClick, variant, className }) => (
-  <button 
-    onClick={onClick} 
+  <button
+    onClick={onClick}
     className={`btn btn-${variant} ${className || ''}`}
     type="button"
   >
@@ -124,57 +124,67 @@ jest.mock("../../components/common/Button/Button", () => ({ children, onClick, v
   </button>
 ));
 
+jest.mock("../../components/group/GroupDetail", () => ({ group }) => (
+  <div data-testid="group-detail">
+    <h2>{group.name}</h2>
+    <div>{group.deliveryLocation}</div>
+    <div>{group.members[0]}</div>
+    <div>{group.members[1]}</div>
+  </div>
+));
+
+
 // ------------------------
 // Tests
 // ------------------------
 describe("Dashboard Home Page", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
-    });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    test("renders 'Restaurants Near You' and all restaurant cards", () => {
-        render(
-            <MemoryRouter>
-                <Dashboard />
-            </MemoryRouter>
-        );
+  test("renders 'Restaurants Near You' and all restaurant cards", () => {
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
 
-        expect(screen.getByText("Restaurants Near You")).toBeInTheDocument();
-        expect(screen.getByText("Test Restaurant 1")).toBeInTheDocument();
-        expect(screen.getByText("Test Restaurant 2")).toBeInTheDocument();
-    });
+    expect(screen.getByText("Restaurants Near You")).toBeInTheDocument();
+    expect(screen.getByText("Test Restaurant 1")).toBeInTheDocument();
+    expect(screen.getByText("Test Restaurant 2")).toBeInTheDocument();
+  });
 });
 
 describe("Dashboard Restaurant Detail Page", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test("clicking Add to Cart calls addToCart", async () => {
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Open restaurant detail
+    fireEvent.click(screen.getByText("Test Restaurant 1"));
+
+    // Wait for menu items to appear
+    await waitFor(() => {
+      expect(screen.getByText("Burger")).toBeInTheDocument();
     });
 
-    test("clicking Add to Cart calls addToCart", async () => {
-        render(
-            <MemoryRouter>
-                <Dashboard />
-            </MemoryRouter>
-        );
-
-        // Open restaurant detail
-        fireEvent.click(screen.getByText("Test Restaurant 1"));
-
-        // Wait for menu items to appear
-        await waitFor(() => {
-            expect(screen.getByText("Burger")).toBeInTheDocument();
-        });
-
-        // Click "Add to Cart" for first item
-        fireEvent.click(screen.getAllByText(/Add to Cart/i)[0]);
-        expect(mockAddToCart).toHaveBeenCalledWith({ id: "item1", name: "Burger", price: 10 });
-    });
+    // Click "Add to Cart" for first item
+    fireEvent.click(screen.getAllByText(/Add to Cart/i)[0]);
+    expect(mockAddToCart).toHaveBeenCalledWith({ id: "item1", name: "Burger", price: 10 });
+  });
 });
 
 describe("Dashboard Navbar Navigation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Configure mocks with test data
     mockGetUserGroups.mockResolvedValue([
       {
@@ -188,7 +198,7 @@ describe("Dashboard Navbar Navigation", () => {
         maxMembers: 10
       }
     ]);
-    
+
     mockGetAllGroups.mockResolvedValue([]);
   });
 
@@ -356,5 +366,57 @@ describe("MY_GROUPS API behavior", () => {
     expect(
       screen.queryByText("You haven't joined any groups yet.")
     ).not.toBeInTheDocument();
+  });
+});
+
+// ------------------------
+// Group Detail View tests
+// ------------------------
+describe("Group detail behavior", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockGroupList = [{ id: 1, name: "Lunch Crew", members: ["Guest"] }];
+
+  const mockGroupDetail = {
+    id: 1,
+    name: "Lunch Crew",
+    members: ["Guest", "Alice"],
+    restaurant: "Taco Town",
+    deliveryLocation: "Office",
+    maxMembers: 5,
+  };
+
+  test("clicking View Details loads group details and shows GroupDetail UI", async () => {
+    mockGetUserGroups.mockResolvedValueOnce(mockGroupList);
+    mockGetGroupDetails.mockResolvedValueOnce(mockGroupDetail);
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Navigate to My Groups
+    fireEvent.click(screen.getByRole("button", { name: /My Groups/i }));
+
+    // Wait for group card
+    await screen.findByText("Lunch Crew");
+
+    // Click View Details
+    fireEvent.click(screen.getByRole("button", { name: /View Details/i }));
+
+    // Wait for detail UI
+    expect(await screen.findByTestId("group-detail")).toBeInTheDocument();
+
+    // Verify fields exist
+    expect(screen.getByText("Lunch Crew")).toBeInTheDocument();
+    expect(screen.getByText("Office")).toBeInTheDocument();
+    expect(screen.getByText("Guest")).toBeInTheDocument();
+    expect(screen.getByText("Alice")).toBeInTheDocument();
+
+    // Ensure the group list empty state is gone
+    expect(screen.queryByText(/You haven't joined any groups yet/i)).not.toBeInTheDocument();
   });
 });
