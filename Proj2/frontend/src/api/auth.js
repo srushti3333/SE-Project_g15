@@ -17,15 +17,16 @@ export const signupUser = async (username, email, password) => {
 };
 
 
-// Login: backend expects { email, password }
+// Login: backend expects { username, password }
 export const loginUser = async (username, password) => {
   try {
-    // send exactly username and password (not email)
+    // send exactly username and password
     const response = await API.post("/auth/login", { username, password });
 
-    // Save token if present
+    // Save token and username if present
     if (response?.data?.token) {
       localStorage.setItem("token", response.data.token);
+      localStorage.setItem("username", response.data.username);
     }
     return response.data;
   } catch (error) {
@@ -34,7 +35,3 @@ export const loginUser = async (username, password) => {
     throw err;
   }
 };
-
-
-
-

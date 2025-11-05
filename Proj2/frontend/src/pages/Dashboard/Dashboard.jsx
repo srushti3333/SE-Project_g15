@@ -29,8 +29,9 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const currentUser = 'Alice'; // Replace with actual logged-in user from auth context
+  // const currentUser = 'Alice'; // Replace with actual logged-in user from auth context
 
+  const currentUser = localStorage.getItem('username') || "Guest";
   // Fetch user's groups when navigating to MY_GROUPS
   useEffect(() => {
     if (currentPage === PAGES.MY_GROUPS) {

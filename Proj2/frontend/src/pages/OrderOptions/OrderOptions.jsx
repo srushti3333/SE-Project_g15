@@ -19,7 +19,8 @@ function OrderOptionsModal() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const currentUser = 'Alice'; // Replace with actual logged-in user from auth context
+  // const currentUser = 'Alice'; // Replace with actual logged-in user from auth context
+  const currentUser = localStorage.getItem('username') || "Guest";
   const deliveryFee = 5.99;
   const estimatedDeliveryTime = "30-40 min";
 
