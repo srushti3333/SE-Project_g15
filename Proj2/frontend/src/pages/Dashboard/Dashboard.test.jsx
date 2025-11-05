@@ -260,3 +260,101 @@ describe("Dashboard Navbar Navigation", () => {
     expect(screen.queryByText("No groups available to join right now.")).not.toBeInTheDocument();
   });
 });
+
+// ------------------------
+// MY_GROUPS API behavior tests
+// ------------------------
+describe("MY_GROUPS API behavior", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const goToMyGroups = () => {
+    fireEvent.click(screen.getByRole("button", { name: "My Groups" }));
+  };
+
+  test("shows loading state while fetching user groups", async () => {
+    // delay the promise so loading UI appears
+    mockGetUserGroups.mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve([]), 200))
+    );
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    goToMyGroups();
+
+    // loading state should appear immediately
+    expect(screen.getByText(/Loading your groups/i)).toBeInTheDocument();
+
+    // wait till fetch finishes
+    await waitFor(() =>
+      expect(mockGetUserGroups).toHaveBeenCalledWith("Guest")
+    );
+  });
+
+  test("shows error banner when API fails", async () => {
+    mockGetUserGroups.mockRejectedValueOnce(new Error("API failed"));
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    goToMyGroups();
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(/Failed to load your groups/i)
+      ).toBeInTheDocument()
+    );
+
+    // retry button should appear
+    expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
+  });
+
+  test("shows empty state when zero groups returned", async () => {
+    mockGetUserGroups.mockResolvedValueOnce([]);
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    goToMyGroups();
+
+    await waitFor(() =>
+      expect(
+        screen.getByText("You haven't joined any groups yet.")
+      ).toBeInTheDocument()
+    );
+  });
+
+  test("renders group list on success", async () => {
+    mockGetUserGroups.mockResolvedValueOnce([
+      { id: 1, name: "Test Group", members: ["Guest"] },
+    ]);
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    goToMyGroups();
+
+    await waitFor(() => {
+      expect(screen.getByText("Test Group")).toBeInTheDocument();
+    });
+
+    // empty message should NOT show
+    expect(
+      screen.queryByText("You haven't joined any groups yet.")
+    ).not.toBeInTheDocument();
+  });
+});
