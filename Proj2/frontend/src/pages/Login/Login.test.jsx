@@ -5,6 +5,10 @@ import Login from './Login';
 import * as api from '../../api/auth';
 import '@testing-library/jest-dom';
 
+// Mock window.alert to avoid JSDOM errors
+beforeAll(() => {
+  window.alert = jest.fn();
+});
 
 // Mock navigate
 const mockNavigate = jest.fn();
@@ -19,7 +23,7 @@ jest.mock('../../api/auth', () => ({
 }));
 
 describe('Login Page', () => {
-  
+
   test('renders all inputs and submit button disabled initially', () => {
     render(
       <MemoryRouter>
