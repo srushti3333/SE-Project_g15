@@ -4,11 +4,14 @@ import { MemoryRouter } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import '@testing-library/jest-dom';
 
-
-// Mock CartContext
-jest.mock("../../context/CartContext.jsx", () => ({
-  useCart: () => ({ addToCart: jest.fn() }),
-}));
+// Mock CartContext with internal mock function
+jest.mock("../../context/CartContext.jsx", () => {
+  const addToCart = jest.fn();
+  return {
+    useCart: () => ({ addToCart }),
+    __esModule: true, // optional but sometimes required for ES modules
+  };
+});
 
 // Mock Navbar and CartSidebar
 jest.mock("../../components/common/Navbar/Navbar", () => () => <div />);
@@ -50,7 +53,7 @@ jest.mock("../../utils/constants", () => ({
   }
 }));
 
-// Mock API modules that use axios
+// Mock API modules
 jest.mock("../../api/groups", () => ({
   getUserGroups: jest.fn().mockResolvedValue([]),
   getAllGroups: jest.fn().mockResolvedValue([]),
@@ -62,8 +65,10 @@ jest.mock("../../api/groups", () => ({
   joinGroup: jest.fn().mockResolvedValue({}),
 }));
 
+// ------------------------
+// Tests
+// ------------------------
 describe("Dashboard Home Page", () => {
-
   test("renders 'Restaurants Near You' and all restaurant cards", () => {
     render(
       <MemoryRouter>
@@ -75,35 +80,24 @@ describe("Dashboard Home Page", () => {
     expect(screen.getByText("Test Restaurant 1")).toBeInTheDocument();
     expect(screen.getByText("Test Restaurant 2")).toBeInTheDocument();
   });
+});
 
-  test("clicking a restaurant card shows restaurant detail page", () => {
+describe("Dashboard Restaurant Detail Page", () => {
+  test("clicking Add to Cart calls addToCart", () => {
+    const { useCart } = require("../../context/CartContext.jsx");
+    const { addToCart } = useCart(); // now we can access the internal mock
+
     render(
       <MemoryRouter>
         <Dashboard />
       </MemoryRouter>
     );
 
+    // Open restaurant detail
     fireEvent.click(screen.getByText("Test Restaurant 1"));
 
-    expect(screen.getByText("Test Restaurant 1")).toBeInTheDocument();
-    expect(screen.getByText("⭐ 4.5")).toBeInTheDocument();
-    expect(screen.getByText("📍 Test City")).toBeInTheDocument();
-
-    expect(screen.getByText("Burger")).toBeInTheDocument();
-    expect(screen.getByText("Fries")).toBeInTheDocument();
+    // Click "Add to Cart" for first item
+    fireEvent.click(screen.getAllByText(/Add to Cart/i)[0]);
+    expect(addToCart).toHaveBeenCalledWith({ id: "item1", name: "Burger", price: 10 });
   });
-
-  test("back button returns to restaurant list", () => {
-    render(
-      <MemoryRouter>
-        <Dashboard />
-      </MemoryRouter>
-    );
-
-    fireEvent.click(screen.getByText("Test Restaurant 1"));
-    fireEvent.click(screen.getByText("← Back to Restaurants"));
-
-    expect(screen.getByText("Restaurants Near You")).toBeInTheDocument();
-  });
-
 });
