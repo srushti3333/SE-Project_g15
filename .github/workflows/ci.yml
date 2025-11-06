@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend-tests:
-    name: Backend Tests
+    name: Proj2/backend Tests
     runs-on: ubuntu-latest
     
     services:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend
+          cd Proj2/backend
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
@@ -46,14 +46,14 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/foodpool_test
           JWT_SECRET_KEY: test-secret-key
         run: |
-          cd backend
+          cd Proj2/backend
           pytest --cov=. --cov-report=xml --cov-report=term -v || echo "No tests found yet"
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./backend/coverage.xml
-          flags: backend
+          files: ./Proj2/backend/coverage.xml
+          flags: Proj2/backend
           fail_ci_if_error: false
         continue-on-error: true
 
@@ -72,18 +72,18 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd frontend
+          cd Proj2/frontend
           npm ci || npm install
 
       - name: Run tests
         run: |
-          cd frontend
+          cd Proj2/frontend
           npm test -- --passWithNoTests --watchAll=false || echo "No tests found yet"
         continue-on-error: true
 
       - name: Build
         run: |
-          cd frontend
+          cd Proj2/frontend
           npm run build
 
   lint:
@@ -95,6 +95,6 @@ jobs:
       
       - name: Check Python files
         run: |
-          cd backend
+          cd Proj2/backend
           python -m py_compile *.py || echo "Python files checked"
         continue-on-error: true
