@@ -131,21 +131,24 @@ Test Coverage: 100+ test cases covering nominal and off-nominal scenarios
 SE-Project_g15/
 ├── backend/
 │   ├── app.py              # Flask entry point
-│   ├── models.py           # Database models
-│   ├── routes.py           # API endpoints
+│   ├── models/             # Database models
+│   ├── controllers/        # Relevant controllers
+│   ├── routes/             # API endpoints
 │   ├── requirements.txt    # Dependencies
+│   ├── .env    # Dependencies
 │   └── tests/              # Backend tests
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── App.jsx
-│   │   ├── routes/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   └── context/
-│   ├── package.json
-│   └── tests/              # Frontend tests
-│
+│   │   ├── pages/          # Frontend tests present with each related file 
+│   │   ├── components/     # Common Components & Frontend tests present with each related file 
+│   │   └── context/        # App context
+│   │   └── routes/         # App route setup
+│   │   └── utils/          # Common utility constants
+│   │   └── hooks/          # Common hooks to use
+│   │   ├── setupTests.js
+│   └──  package.json        
 └── .github/
     └── workflows/
         └── ci.yml          # CI/CD pipeline
