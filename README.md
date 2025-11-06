@@ -3,13 +3,19 @@ The repository contains submissions for Software Engineering project done by Gro
 
 # 🍕 FoodPool: Eat Together. Save Together.
 
-[![Build Status](https://github.com/srushti3333/SE-Project_g15/workflows/CI/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
+[![Build Status](https://github.com/srushti3333/SE-Project_g15/actions/workflows/ci.yml/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
 [![codecov](https://codecov.io/gh/srushti3333/SE-Project_g15/branch/main/graph/badge.svg)](https://codecov.io/gh/srushti3333/SE-Project_g15)
+![Flake8](https://img.shields.io/badge/style-flake8-blue)
+![ESLint](https://img.shields.io/badge/lint-eslint-purple)
+![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
+![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)
+![Pylint](https://img.shields.io/badge/lint-pylint-yellowgreen)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.xxxxx.svg)](https://doi.org/10.5281/zenodo.xxxxx)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/flask-3.0.3-green.svg)](https://flask.palletsprojects.com/)
 [![React](https://img.shields.io/badge/react-18.0-blue.svg)](https://reactjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-14%2B-blue.svg)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > Community-driven pooled food ordering platform that saves costs, reduces delivery inefficiency, and promotes eco-friendly practices.
 
