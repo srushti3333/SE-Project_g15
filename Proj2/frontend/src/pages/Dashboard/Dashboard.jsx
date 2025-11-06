@@ -29,6 +29,10 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Filtering State
+  const [filterStatus, setFilterStatus] = useState("all"); // all | open | closing | expired
+  const [filterRestaurant, setFilterRestaurant] = useState("all");
+
   // const currentUser = 'Alice'; // Replace with actual logged-in user from auth context
 
   const currentUser = localStorage.getItem('username') || "Guest";
@@ -113,6 +117,27 @@ function Dashboard() {
       }
     }
   };
+
+  // Filter groups based on user selection
+  const filteredGroups = allGroups
+    // Exclude groups user already joined
+    .filter((g) => !g.members.includes(currentUser))
+    // Filter by restaurant
+    .filter((g) => filterRestaurant === "all" || g.restaurant_id === parseInt(filterRestaurant))
+    // Filter by order time status
+    .filter((g) => {
+      if (filterStatus === "all") return true;
+
+      const deadline = new Date(g.nextOrderTime);
+      const now = new Date();
+      const diffMinutes = (deadline - now) / (1000 * 60);
+
+      if (filterStatus === "open") return diffMinutes > 60;
+      if (filterStatus === "closing") return diffMinutes <= 60 && diffMinutes > 0;
+      if (filterStatus === "expired") return diffMinutes <= 0;
+      return true;
+    });
+
 
   return (
     <div className="dashboard-container">
@@ -242,7 +267,7 @@ function Dashboard() {
         {/* Find Groups Page */}
         {currentPage === PAGES.FIND_GROUPS && (
           <div>
-            <h2 className="page-title">Find Groups</h2>
+            {/* <h2 className="page-title">Find Groups</h2> */}
 
             {error && (
               <div className="error-banner">
@@ -251,20 +276,49 @@ function Dashboard() {
               </div>
             )}
 
+            {/* Filter Controls */}
+            <div className="filters-bar mb-4 flex gap-4 items-center">
+              <div>
+                <label className="font-medium mr-2">Status:</label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="all">All</option>
+                  <option value="open">Open</option>
+                  <option value="closing">Closing Soon</option>
+                  <option value="expired">Expired</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-medium mr-2">Restaurant:</label>
+                <select
+                  value={filterRestaurant}
+                  onChange={(e) => setFilterRestaurant(e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="all">All</option>
+                  {RESTAURANTS.map((r) => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Filtered Results */}
             {loading ? (
               <div className="loading-state">
                 <p>Loading available groups...</p>
               </div>
-            ) : allGroups.length === 0 ? (
+            ) : filteredGroups.length === 0 ? (
               <div className="empty-state">
-                <p>No groups available to join right now.</p>
-                <p className="empty-state-subtitle">
-                  Create a pool when you order to start a new group!
-                </p>
+                <p>No matching groups found.</p>
               </div>
             ) : (
               <div className="groups-grid">
-                {allGroups.map(group => (
+                {filteredGroups.map(group => (
                   <GroupCard
                     key={group.id}
                     group={group}
