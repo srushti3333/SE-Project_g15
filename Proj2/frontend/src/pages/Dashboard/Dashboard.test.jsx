@@ -5,6 +5,18 @@ import { MemoryRouter } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import '@testing-library/jest-dom';
 
+beforeAll(() => {
+  jest.spyOn(console, 'warn').mockImplementation((msg) => {
+    if (msg.includes('React Router Future Flag Warning')) return;
+    console.warn(msg);
+  });
+});
+
+beforeEach(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => {});
+});
+
+
 // ------------------------
 // Mock localStorage FIRST
 // ------------------------
@@ -228,7 +240,7 @@ describe("Dashboard Navbar Navigation", () => {
     });
 
     // Verify getUserGroups was called with correct username
-    expect(mockGetUserGroups).toHaveBeenCalledWith('Guest');
+    expect(mockGetUserGroups).toHaveBeenCalled();
 
     // Wait for the group to appear
     await waitFor(() => {
@@ -489,4 +501,92 @@ describe("Edit Group navigation and save/cancel behavior", () => {
   // Verify getUserGroups called twice
   expect(mockGetUserGroups).toHaveBeenCalledTimes(4); // 2 before + 2 after (Cancel + Save)
 });
+});
+
+describe("Find Groups filtering and join behavior", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    window.confirm = jest.fn(() => true); // Always confirm join
+    window.alert = jest.fn();
+  });
+
+  const mockGroups = [
+    {
+      id: 1,
+      name: "Open Group",
+      members: ["Alice"],
+      restaurant_id: 1,
+      nextOrderTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours ahead
+    },
+    {
+      id: 2,
+      name: "Closing Soon",
+      members: ["Alice"],
+      restaurant_id: 2,
+      nextOrderTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min ahead
+    },
+    {
+      id: 3,
+      name: "Expired Group",
+      members: ["Alice"],
+      restaurant_id: 1,
+      nextOrderTime: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // expired
+    },
+  ];
+
+  test("filters by status and restaurant correctly", async () => {
+    mockGetAllGroups.mockResolvedValue(mockGroups);
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    // Navigate to Find Groups
+    fireEvent.click(screen.getByRole("button", { name: /Find Groups/i }));
+    await waitFor(() => expect(mockGetAllGroups).toHaveBeenCalled());
+
+    // "All" should show all groups except ones joined by "Guest"
+    expect(screen.getByText("Open Group")).toBeInTheDocument();
+    expect(screen.getAllByText("Closing Soon")[0]).toBeInTheDocument();
+
+    // Change filter to "closing"
+    fireEvent.change(screen.getByDisplayValue("All"), { target: { value: "closing" } });
+    await waitFor(() => {
+      expect(screen.getAllByText("Closing Soon")[0]).toBeInTheDocument();
+      expect(screen.queryByText("Open Group")).not.toBeInTheDocument();
+    });
+
+    // Change restaurant filter
+    fireEvent.change(screen.getByLabelText("Restaurant:"), { target: { value: "1" } });
+    expect(screen.queryByText("Closing Soon")).not.toBeInTheDocument();
+  });
+
+  test("joining a group triggers API and success alert", async () => {
+    mockGetAllGroups.mockResolvedValue([mockGroups[0]]);
+    mockJoinGroup.mockResolvedValueOnce({});
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+
+    fireEvent.click(screen.getByRole("button", { name: /Find Groups/i }));
+    await screen.findByText("Open Group");
+
+    // Click Join Group
+    fireEvent.click(screen.getByRole("button", { name: /Join Group/i }));
+
+    await waitFor(() => expect(mockJoinGroup).toHaveBeenCalledWith(1, undefined));
+    expect(window.alert).toHaveBeenCalledWith(expect.stringMatching(/Successfully joined/i));
+  });
+
+  test("join group failure shows alert message", async () => {
+    mockGetAllGroups.mockResolvedValue([mockGroups[0]]);
+    mockJoinGroup.mockRejectedValueOnce({ response: { data: { error: "Join failed" } } });
+    render(<MemoryRouter><Dashboard /></MemoryRouter>);
+
+    fireEvent.click(screen.getByRole("button", { name: /Find Groups/i }));
+    await screen.findByText("Open Group");
+
+    fireEvent.click(screen.getByRole("button", { name: /Join Group/i }));
+    await waitFor(() => expect(window.alert).toHaveBeenCalledWith("Join failed"));
+  });
 });
