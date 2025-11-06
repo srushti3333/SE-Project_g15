@@ -41,7 +41,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
-      - name: Run backend tests with coverage
+      - name: Run tests with coverage
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/foodpool_test
           JWT_SECRET_KEY: test-secret-key
@@ -75,26 +75,20 @@ jobs:
           cd frontend
           npm ci || npm install
 
-      - name: Build frontend (ignore ESLint warnings)
+      - name: Run tests
         run: |
           cd frontend
-          CI=false npm run build || echo "Build completed with warnings"
+          npm test -- --passWithNoTests --watchAll=false || echo "No tests found yet"
+        continue-on-error: true
 
-      - name: Run frontend tests with coverage
+      - name: Build
         run: |
           cd frontend
-          npm test -- --coverage --passWithNoTests --watchAll=false || echo "No tests found yet"
-
-      - name: Upload frontend coverage report
-        uses: actions/upload-artifact@v3
-        with:
-          name: frontend-coverage
-          path: frontend/coverage/lcov-report/
+          npm run build
 
   lint:
     name: Code Quality
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
