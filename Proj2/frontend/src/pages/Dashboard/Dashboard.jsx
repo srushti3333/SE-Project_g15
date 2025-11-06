@@ -22,12 +22,16 @@ function Dashboard() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [editingGroup, setEditingGroup] = useState(null);
   const [pollGroup, setPollGroup] = useState(null);
-  
+
   // Backend state
   const [myGroups, setMyGroups] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Filtering State
+  const [filterStatus, setFilterStatus] = useState("all"); // all | open | closing | expired
+  const [filterRestaurant, setFilterRestaurant] = useState("all");
 
   // const currentUser = 'Alice'; // Replace with actual logged-in user from auth context
 
@@ -50,7 +54,7 @@ function Dashboard() {
     setLoading(true);
     setError('');
     try {
-      const groups = await getUserGroups(currentUser);
+      const groups = await getUserGroups();
       setMyGroups(groups);
     } catch (err) {
       console.error('Error fetching my groups:', err);
@@ -103,7 +107,7 @@ function Dashboard() {
   const handleJoinGroup = async (group) => {
     if (window.confirm(`Do you want to join "${group.name}"?`)) {
       try {
-        await joinGroup(group.id, currentUser);
+        await joinGroup(group.id);
         alert(`Successfully joined ${group.name}!`);
         fetchAllGroups(); // Refresh the list
         fetchMyGroups(); // Update my groups as well
@@ -113,6 +117,27 @@ function Dashboard() {
       }
     }
   };
+
+  // Filter groups based on user selection
+  const filteredGroups = allGroups
+    // Exclude groups user already joined
+    .filter((g) => !g.members.includes(currentUser))
+    // Filter by restaurant
+    .filter((g) => filterRestaurant === "all" || g.restaurant_id === parseInt(filterRestaurant))
+    // Filter by order time status
+    .filter((g) => {
+      if (filterStatus === "all") return true;
+
+      const deadline = new Date(g.nextOrderTime);
+      const now = new Date();
+      const diffMinutes = (deadline - now) / (1000 * 60);
+
+      if (filterStatus === "open") return diffMinutes > 60;
+      if (filterStatus === "closing") return diffMinutes <= 60 && diffMinutes > 0;
+      if (filterStatus === "expired") return diffMinutes <= 0;
+      return true;
+    });
+
 
   return (
     <div className="dashboard-container">
@@ -193,11 +218,11 @@ function Dashboard() {
                 />
               </div>
             )}
-            
+
             {!selectedGroup && (
               <>
                 <h2 className="page-title">My Groups</h2>
-                
+
                 {error && (
                   <div className="error-banner">
                     {error}
@@ -215,8 +240,8 @@ function Dashboard() {
                     <p className="empty-state-subtitle">
                       Browse available groups or create a pool when ordering!
                     </p>
-                    <Button 
-                      variant="primary" 
+                    <Button
+                      variant="primary"
                       onClick={() => setCurrentPage(PAGES.FIND_GROUPS)}
                     >
                       Find Groups
@@ -242,8 +267,8 @@ function Dashboard() {
         {/* Find Groups Page */}
         {currentPage === PAGES.FIND_GROUPS && (
           <div>
-            <h2 className="page-title">Find Groups</h2>
-            
+            {/* <h2 className="page-title">Find Groups</h2> */}
+
             {error && (
               <div className="error-banner">
                 {error}
@@ -251,20 +276,49 @@ function Dashboard() {
               </div>
             )}
 
+            {/* Filter Controls */}
+            <div className="filters-bar mb-4 flex gap-4 items-center">
+              <div>
+                <label className="font-medium mr-2">Status:</label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="all">All</option>
+                  <option value="open">Open</option>
+                  <option value="closing">Closing Soon</option>
+                  <option value="expired">Expired</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-medium mr-2">Restaurant:</label>
+                <select
+                  value={filterRestaurant}
+                  onChange={(e) => setFilterRestaurant(e.target.value)}
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="all">All</option>
+                  {RESTAURANTS.map((r) => (
+                    <option key={r.id} value={r.id}>{r.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Filtered Results */}
             {loading ? (
               <div className="loading-state">
                 <p>Loading available groups...</p>
               </div>
-            ) : allGroups.length === 0 ? (
+            ) : filteredGroups.length === 0 ? (
               <div className="empty-state">
-                <p>No groups available to join right now.</p>
-                <p className="empty-state-subtitle">
-                  Create a pool when you order to start a new group!
-                </p>
+                <p>No matching groups found.</p>
               </div>
             ) : (
               <div className="groups-grid">
-                {allGroups.map(group => (
+                {filteredGroups.map(group => (
                   <GroupCard
                     key={group.id}
                     group={group}
@@ -282,11 +336,23 @@ function Dashboard() {
         {currentPage === PAGES.EDIT_GROUP && editingGroup && (
           <EditGroupPage
             group={editingGroup}
-            onSave={(updated) => {
-              console.log("Saved updated group", updated);
+            onSave={(updatedGroup) => {
+              console.log("Saved updated group", updatedGroup);
+
+              // Instantly update the edited group in state
+              setMyGroups((prevGroups) =>
+                prevGroups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
+              );
+
+              // If this group is currently open in detail view, update it too
+              setSelectedGroup((prev) =>
+                prev && prev.id === updatedGroup.id ? updatedGroup : prev
+              );
+
+              // Close edit page and refresh as backup (optional)
               setEditingGroup(null);
               setCurrentPage(PAGES.MY_GROUPS);
-              fetchMyGroups(); // Refresh groups
+              fetchMyGroups(); // optional fallback to ensure backend sync
             }}
             onCancel={() => {
               setEditingGroup(null);

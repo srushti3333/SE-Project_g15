@@ -16,6 +16,7 @@ const EditGroupPage = ({ group, onSave, onCancel }) => {
   const [error, setError] = useState('');
 
   const handleSave = async () => {
+    console.log("Saving group update...");
     setLoading(true);
     setError('');
 
@@ -26,9 +27,11 @@ const EditGroupPage = ({ group, onSave, onCancel }) => {
         nextOrderTime: new Date(nextOrderTime).toISOString(),
         maxMembers: parseInt(maxMembers)
       };
+      console.log("Payload:", updatedData);
 
       const updatedGroup = await updateGroup(group.id, updatedData);
       alert('Group updated successfully!');
+      console.log("Response:", updatedGroup);
       onSave(updatedGroup);
     } catch (err) {
       console.error('Error updating group:', err);

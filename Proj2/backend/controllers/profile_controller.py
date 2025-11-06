@@ -4,6 +4,10 @@ from werkzeug.utils import secure_filename
 from models.user import User
 from extensions import db
 from flask_jwt_extended import get_jwt
+from flask import jsonify
+from flask_jwt_extended import get_jwt
+from models.order import GroupOrder
+from models.group import Group
 
 # Allowed file extensions for profile pictures
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -91,3 +95,24 @@ def update_profile():
         "message": "Profile updated successfully",
         "profile_picture": profile_picture_url
     }), 200
+
+def get_past_orders():
+    """Fetch past group orders for the logged-in user."""
+    claims = get_jwt()
+    username = claims.get("username")
+
+    # Fetch all orders for this user
+    orders = GroupOrder.query.filter_by(username=username).order_by(GroupOrder.created_at.desc()).all()
+
+    order_list = []
+    for o in orders:
+        group = Group.query.get(o.group_id)
+        order_list.append({
+            "orderId": o.id,
+            "groupName": group.name if group else "Unknown Group",
+            "restaurantId": group.restaurant_id if group else None,
+            "items": [item.to_dict() for item in o.items],
+            "orderDate": o.created_at.isoformat() if o.created_at else None
+        })
+
+    return jsonify(order_list), 200
