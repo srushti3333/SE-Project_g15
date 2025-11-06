@@ -22,6 +22,10 @@ def register_user():
     if not all([username, email, password]):
         return jsonify({'message': 'All fields are required'}), 400
 
+    # 🚫 Invalid username (only letters, digits, underscores, dots)
+    if not re.match(r"^[A-Za-z0-9_.]{3,20}$", username):
+        return jsonify({'message': 'Invalid username format. Use only letters, numbers, underscores, and periods.'}), 400
+
     # Password too short
     if len(password) < 6:
         return jsonify({'message': 'Password must be at least 6 characters long'}), 400
@@ -47,6 +51,7 @@ def register_user():
         "username": new_user.username,
         "email": new_user.email
     }), 201
+
 
 
 # ==============================
@@ -80,29 +85,20 @@ def login_user():
 @auth_bp.route('/api/profile/me', methods=['GET'])
 @jwt_required()
 def get_profile():
+
+    
     """
     ✅ Fixes:
     - test_token_protected_endpoint (should return 200)
     - test_unauthorized_access_denied (should return 401)
     - test_token_expiration_behavior (should return 401/422)
     """
-    from flask_jwt_extended.exceptions import NoAuthorizationError
-    try:
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
-        if not user:
-            return jsonify({'message': 'User not found'}), 404
+    user_id = get_jwt_identity()
+    user = User.query.get(int(user_id)) if user_id else None
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
 
-        # ✅ Return user info
-        return jsonify({
-            "username": user.username,
-            "email": user.email
-        }), 200
-
-    except NoAuthorizationError:
-        # Missing or expired token
-        return jsonify({'message': 'Authorization token missing'}), 401
-
-    except Exception as e:
-        print("Token error:", e)
-        return jsonify({'message': 'Invalid or expired token'}), 401
+    return jsonify({
+        "username": user.username,
+        "email": user.email
+    }), 200
