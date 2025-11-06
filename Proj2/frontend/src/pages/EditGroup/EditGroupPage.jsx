@@ -50,8 +50,9 @@ const EditGroupPage = ({ group, onSave, onCancel }) => {
       )}
 
       <div className="form-group">
-        <label>Restaurant</label>
+        <label htmlFor="restaurant">Restaurant</label>
         <select
+          id="restaurant"
           value={restaurantId}
           onChange={(e) => setRestaurantId(e.target.value)}
           className="form-select"
@@ -63,8 +64,9 @@ const EditGroupPage = ({ group, onSave, onCancel }) => {
       </div>
 
       <div className="form-group">
-        <label>Delivery Location</label>
+        <label htmlFor="deliveryLocation">Delivery Location</label>
         <input
+          id="deliveryLocation"
           type="text"
           value={deliveryLocation}
           onChange={(e) => setDeliveryLocation(e.target.value)}
@@ -74,8 +76,9 @@ const EditGroupPage = ({ group, onSave, onCancel }) => {
       </div>
 
       <div className="form-group">
-        <label>Next Order Time</label>
+        <label htmlFor="nextOrderTime">Next Order Time</label>
         <input
+          id="nextOrderTime"
           type="datetime-local"
           value={nextOrderTime}
           onChange={(e) => setNextOrderTime(e.target.value)}
@@ -84,8 +87,9 @@ const EditGroupPage = ({ group, onSave, onCancel }) => {
       </div>
 
       <div className="form-group">
-        <label>Max Members</label>
+        <label htmlFor="maxMembers">Max Members</label>
         <input
+          id="maxMembers"
           type="number"
           value={maxMembers}
           onChange={(e) => setMaxMembers(e.target.value)}

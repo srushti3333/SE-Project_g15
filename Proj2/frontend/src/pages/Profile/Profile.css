@@ -111,3 +111,19 @@
 .order-item-qty {
   color: #6b7280;
 }
+.logout-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.logout-button:hover {
+  background-color: #b02a37;
+}

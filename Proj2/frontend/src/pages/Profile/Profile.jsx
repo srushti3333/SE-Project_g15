@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { fetchProfile, updateProfile } from "../../api/profile";
 import Navbar from "../../components/common/Navbar/Navbar";
+import { useNavigate } from "react-router-dom"; // ✅ for redirect after logout
 import "./Profile.css";
 import { getPastOrders } from "../../api/orders";
 import { RESTAURANTS } from "../../utils/constants";
@@ -15,6 +16,7 @@ const Profile = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
+  const navigate = useNavigate(); // ✅ navigation hook
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -81,11 +83,19 @@ const Profile = () => {
     }
   };
 
+  // ✅ Logout logic
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    alert("You have been logged out.");
+    navigate("/login");
+  };
 
   if (!profile) return <div className="profile">Loading profile...</div>;
 
   return (
     <>
+      {/* Navbar at top */}
       <Navbar currentPage="profile" />
 
       <div className="profile-container">
