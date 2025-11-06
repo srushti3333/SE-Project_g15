@@ -3,12 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Clock, Users, Zap, MapPin, TrendingDown, Leaf } from 'lucide-react';
 import { createGroup, getAllGroups, joinGroup } from '../../api/groups';
+import { placeGroupOrder, getGroupOrders, deleteGroupOrder, placeImmediateOrder } from '../../api/orders';
+import { useCart } from '../../context/CartContext';
 
 function OrderOptionsModal() {
   const location = useLocation();
   const navigate = useNavigate();
   const { cart, cartTotal, restaurant } = location.state || {};
-  
+  const { clearCart } = useCart();
+
   const [selectedOption, setSelectedOption] = useState(null);
   const [poolTimeLimit, setPoolTimeLimit] = useState(15);
   const [maxMembers, setMaxMembers] = useState(8);
@@ -36,12 +39,25 @@ function OrderOptionsModal() {
     setError('');
     try {
       const allGroups = await getAllGroups();
-      // Filter groups for the same restaurant that aren't full
-      const filtered = allGroups
-        .filter(g => g.restaurant_id === restaurant?.id && g.members.length < g.maxMembers)
+      const nowUTC = new Date().getTime();
+      const validGroups = allGroups
+        .filter(g => {
+          const groupTime = new Date(g.nextOrderTime).getTime();
+          return groupTime > nowUTC;
+        });
+      // Filter groups:
+      // 1. Same restaurant
+      // 2. Not full
+      // 3. Current user is NOT already a member
+      const filtered = validGroups
+        .filter(g =>
+          g.restaurant_id === restaurant?.id &&
+          g.members.length < g.maxMembers &&
+          !g.members.includes(currentUser) // <-- exclude groups user is in
+        )
         .map(g => ({
           id: g.id,
-          groupData: g, // Store full group data
+          groupData: g, // store full group data
           restaurantName: restaurant.name,
           restaurantEmoji: restaurant.image,
           organizerName: g.organizer,
@@ -50,7 +66,7 @@ function OrderOptionsModal() {
           timeRemaining: calculateTimeRemaining(g.nextOrderTime),
           estimatedSavings: (deliveryFee / Math.max(g.members.length + 1, 2)).toFixed(2),
           deliveryLocation: g.deliveryLocation,
-          distance: "0.5 km" // Mock distance - can be calculated based on location later
+          distance: "0.5 km" // placeholder
         }));
       setNearbyPools(filtered);
     } catch (error) {
@@ -61,28 +77,62 @@ function OrderOptionsModal() {
     }
   };
 
+
   const calculateTimeRemaining = (nextOrderTime) => {
-    const now = new Date();
-    const orderTime = new Date(nextOrderTime);
-    const diff = orderTime - now;
-    
+    const nowUTC = Date.now(); // UTC timestamp in ms
+    const orderTimeUTC = new Date(nextOrderTime).getTime(); // parse ISO string (UTC)
+    const diff = orderTimeUTC - nowUTC;
+
     if (diff <= 0) return "Expired";
-    
+
     const minutes = Math.floor(diff / 60000);
     if (minutes < 60) return `${minutes} min`;
-    
+
     const hours = Math.floor(minutes / 60);
     return `${hours}h ${minutes % 60}m`;
   };
 
-  const handleOrderNow = () => {
-    // Handle immediate order placement
-    console.log('Placing immediate order:', { cart, cartTotal, restaurant });
-    setShowSuccess(true);
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 2000);
+
+  const handleOrderNow = async () => {
+    if (!deliveryLocation.trim()) {
+      setError('Please enter a delivery location');
+      return;
+    }
+    setLoading(true);
+    setError('');
+
+    try {
+      // Create a temporary solo group for "Immediate Order"
+      const group = await createGroup({
+        name: `${restaurant.name} Solo - ${currentUser}`,
+        restaurant_id: restaurant.id,
+        deliveryType: 'Solo',
+        deliveryLocation: deliveryLocation || 'Default',
+        nextOrderTime: new Date().toISOString(), // technically ignored by immediate API
+        maxMembers: 1
+      });
+
+      // Map cart items to backend format
+      const items = cart.map(item => ({
+        menuItemId: item.id,                      // <--- key difference
+        quantity: item.quantity || 1,
+        specialInstructions: item.specialInstructions || ''
+      }));
+
+      // Use the new immediate order API
+      await placeImmediateOrder(group.id, items);
+
+      setShowSuccess(true);
+      clearCart();
+      setTimeout(() => navigate('/dashboard'), 2000);
+    } catch (err) {
+      console.error('Error placing order:', err);
+      setError(err.response?.data?.error || 'Failed to place order');
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const handleCreatePool = async () => {
     if (!deliveryLocation.trim()) {
@@ -94,49 +144,69 @@ function OrderOptionsModal() {
     setError('');
 
     try {
-      // Calculate next order time based on pool time limit
-      const nextOrderTime = new Date();
-      nextOrderTime.setMinutes(nextOrderTime.getMinutes() + poolTimeLimit);
+      // Compute the absolute deadline for the pool
+      const nextOrderTimeUTC = new Date(Date.now() + poolTimeLimit * 60000).toISOString();
+
+      const items = cart.map(item => ({
+        menuItemId: item.id,
+        quantity: item.quantity || 1,
+        specialInstructions: item.specialInstructions || ''
+      }));
 
       const groupData = {
         name: `${restaurant.name} Pool - ${currentUser}`,
-        organizer: currentUser,
         restaurant_id: restaurant.id,
         deliveryType: 'Split',
-        deliveryLocation: deliveryLocation,
-        nextOrderTime: nextOrderTime.toISOString(),
-        maxMembers: maxMembers
+        deliveryLocation,
+        nextOrderTime: nextOrderTimeUTC,
+        maxMembers
       };
 
+      // Create the pool — backend will store `next_order_time` correctly
       const newGroup = await createGroup(groupData);
-      console.log('Pool created successfully:', newGroup);
-      
+
+      // Place organizer's order using the same `nextOrderTime`
+      await placeGroupOrder(newGroup.id, {
+        nextOrderTime: nextOrderTimeUTC,
+        items
+      });
+
       setShowSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
-    } catch (error) {
-      console.error('Error creating pool:', error);
-      setError(error.response?.data?.error || 'Failed to create pool');
+      clearCart();
+      setTimeout(() => navigate('/dashboard'), 2000);
+    } catch (err) {
+      console.error('Error creating pool:', err);
+      setError(err.response?.data?.error || 'Failed to create pool');
     } finally {
       setLoading(false);
     }
   };
 
+
   const handleJoinPool = async (pool) => {
     setLoading(true);
     setError('');
-
     try {
-      await joinGroup(pool.id, currentUser);
+      await joinGroup(pool.id);
+
+      // Place the joining user's order
+      await placeGroupOrder(pool.id, {
+        nextOrderTime: pool.groupData.nextOrderTime, // ISO string from backend
+        items: cart.map(item => ({
+          menuItemId: item.id,
+          quantity: item.quantity || 1,
+          specialInstructions: item.specialInstructions || ''
+        }))
+      });
+
+
       setSelectedPool(pool);
       setShowSuccess(true);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 2000);
-    } catch (error) {
-      console.error('Error joining pool:', error);
-      setError(error.response?.data?.error || 'Failed to join pool');
+      clearCart();
+      setTimeout(() => navigate('/dashboard'), 2000);
+    } catch (err) {
+      console.error('Error joining pool:', err);
+      setError(err.response?.data?.error || 'Failed to join pool');
     } finally {
       setLoading(false);
     }
@@ -178,7 +248,7 @@ function OrderOptionsModal() {
             <span>Delivery Fee</span>
             <span>${deliveryFee.toFixed(2)}</span>
           </div>
-          <div style={{...styles.summaryRow, ...styles.totalRow}}>
+          <div style={{ ...styles.summaryRow, ...styles.totalRow }}>
             <span style={styles.boldText}>Total</span>
             <span style={styles.totalAmount}>${(cartTotal + deliveryFee).toFixed(2)}</span>
           </div>
@@ -195,7 +265,7 @@ function OrderOptionsModal() {
         {!selectedOption && (
           <div style={styles.optionsGrid}>
             {/* Order Now */}
-            <div 
+            <div
               style={styles.optionCard}
               onClick={() => setSelectedOption('now')}
             >
@@ -219,8 +289,8 @@ function OrderOptionsModal() {
             </div>
 
             {/* Create Pool */}
-            <div 
-              style={{...styles.optionCard, ...styles.recommendedCard}}
+            <div
+              style={{ ...styles.optionCard, ...styles.recommendedCard }}
               onClick={() => setSelectedOption('create')}
             >
               <div style={styles.recommendedBadge}>
@@ -241,13 +311,13 @@ function OrderOptionsModal() {
                 <div>Set time limit for others to join</div>
                 <div>Split delivery costs</div>
               </div>
-              <button style={{...styles.optionButton, ...styles.createButton}}>
+              <button style={{ ...styles.optionButton, ...styles.createButton }}>
                 Create Pool
               </button>
             </div>
 
             {/* Join Pool */}
-            <div 
+            <div
               style={styles.optionCard}
               onClick={() => setSelectedOption('join')}
             >
@@ -266,7 +336,7 @@ function OrderOptionsModal() {
                 <div>Instant savings</div>
                 <div>Meet new people</div>
               </div>
-              <button style={{...styles.optionButton, ...styles.joinButton}}>
+              <button style={{ ...styles.optionButton, ...styles.joinButton }}>
                 Browse Pools
               </button>
             </div>
@@ -279,14 +349,14 @@ function OrderOptionsModal() {
             <button style={styles.backButton} onClick={() => setSelectedOption(null)}>
               ← Back to options
             </button>
-            
+
             <div style={styles.confirmCard}>
-              <Zap size={48} color="#2563eb" style={{marginBottom: '16px'}} />
+              <Zap size={48} color="#2563eb" style={{ marginBottom: '16px' }} />
               <h3 style={styles.confirmTitle}>Confirm Immediate Order</h3>
               <p style={styles.confirmText}>
                 Your order will be placed right away and delivered to your location.
               </p>
-              
+
               <div style={styles.confirmDetails}>
                 <div style={styles.confirmRow}>
                   <span>Estimated Delivery</span>
@@ -298,8 +368,23 @@ function OrderOptionsModal() {
                 </div>
               </div>
 
-              <button 
-                style={styles.confirmButton} 
+              <div style={styles.configSection}>
+                <label style={styles.label}>
+                  Delivery Location
+                  <span style={styles.labelHelper}>Where should the order be delivered?</span>
+                </label>
+                <input
+                  type="text"
+                  value={deliveryLocation}
+                  onChange={(e) => setDeliveryLocation(e.target.value)}
+                  placeholder="Default"
+                  style={styles.input}
+                />
+              </div>
+
+
+              <button
+                style={styles.confirmButton}
                 onClick={handleOrderNow}
                 disabled={loading}
               >
@@ -315,14 +400,14 @@ function OrderOptionsModal() {
             <button style={styles.backButton} onClick={() => setSelectedOption(null)}>
               ← Back to options
             </button>
-            
+
             <div style={styles.confirmCard}>
-              <Users size={48} color="#059669" style={{marginBottom: '16px'}} />
+              <Users size={48} color="#059669" style={{ marginBottom: '16px' }} />
               <h3 style={styles.confirmTitle}>Configure Your Pool</h3>
               <p style={styles.confirmText}>
                 Set parameters for your pool. If no one joins within the time limit, your order will be placed automatically.
               </p>
-              
+
               <div style={styles.configSection}>
                 <label style={styles.label}>
                   Delivery Location
@@ -343,10 +428,10 @@ function OrderOptionsModal() {
                   <span style={styles.labelHelper}>How long to wait for others?</span>
                 </label>
                 <div style={styles.sliderContainer}>
-                  <input 
-                    type="range" 
-                    min="5" 
-                    max="30" 
+                  <input
+                    type="range"
+                    min="5"
+                    max="30"
                     step="5"
                     value={poolTimeLimit}
                     onChange={(e) => setPoolTimeLimit(parseInt(e.target.value))}
@@ -365,10 +450,10 @@ function OrderOptionsModal() {
                   <span style={styles.labelHelper}>Cap the pool size</span>
                 </label>
                 <div style={styles.sliderContainer}>
-                  <input 
-                    type="range" 
-                    min="2" 
-                    max="15" 
+                  <input
+                    type="range"
+                    min="2"
+                    max="15"
                     step="1"
                     value={maxMembers}
                     onChange={(e) => setMaxMembers(parseInt(e.target.value))}
@@ -392,8 +477,8 @@ function OrderOptionsModal() {
                 </div>
               </div>
 
-              <button 
-                style={{...styles.confirmButton, backgroundColor: '#059669'}} 
+              <button
+                style={{ ...styles.confirmButton, backgroundColor: '#059669' }}
                 onClick={handleCreatePool}
                 disabled={loading || !deliveryLocation.trim()}
               >
@@ -409,7 +494,7 @@ function OrderOptionsModal() {
             <button style={styles.backButton} onClick={() => setSelectedOption(null)}>
               ← Back to options
             </button>
-            
+
             <h3 style={styles.sectionTitle}>Available Pools Nearby</h3>
             <p style={styles.sectionSubtitle}>Join a pool and save on delivery costs instantly</p>
 
@@ -418,11 +503,11 @@ function OrderOptionsModal() {
             ) : nearbyPools.length === 0 ? (
               <div style={styles.emptyState}>
                 <p>No active pools found for {restaurant.name}</p>
-                <p style={{fontSize: '14px', color: '#6b7280', marginTop: '8px'}}>
+                <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
                   Be the first to create one!
                 </p>
-                <button 
-                  style={{...styles.confirmButton, marginTop: '16px'}}
+                <button
+                  style={{ ...styles.confirmButton, marginTop: '16px' }}
                   onClick={() => setSelectedOption('create')}
                 >
                   Create a Pool
@@ -467,13 +552,14 @@ function OrderOptionsModal() {
                       <span>Save ${pool.estimatedSavings} on delivery</span>
                     </div>
 
-                    <button 
+                    <button
                       style={styles.joinPoolButton}
                       onClick={() => handleJoinPool(pool)}
-                      disabled={loading}
+                      disabled={loading || pool.groupData.members.includes(currentUser)}
                     >
-                      {loading ? 'Joining...' : 'Join This Pool'}
+                      {loading ? 'Joining...' : pool.groupData.members.includes(currentUser) ? 'Already Joined' : 'Join This Pool'}
                     </button>
+
                   </div>
                 ))}
               </div>

@@ -11,17 +11,21 @@ const CartSidebar = ({ selectedRestaurant }) => {
   const { cart, cartTotal, addToCart, removeFromCart, showCart, setShowCart } = useCart();
 
   const handleCheckout = () => {
+    if (!selectedRestaurant) {
+      alert('Please select a restaurant first!');
+      return;
+    }
     if (cart.length === 0) {
       alert('Your cart is empty!');
       return;
     }
-    
-    navigate('/order-options', { 
-      state: { 
-        cart: cart,
-        cartTotal: cartTotal,
+
+    navigate('/order-options', {
+      state: {
+        cart,
+        cartTotal,
         restaurant: selectedRestaurant
-      } 
+      }
     });
   };
 
@@ -50,15 +54,15 @@ const CartSidebar = ({ selectedRestaurant }) => {
                   </div>
                   <div className="cart-item-controls">
                     <div className="quantity-controls">
-                      <button 
-                        onClick={() => removeFromCart(item.id)} 
+                      <button
+                        onClick={() => removeFromCart(item.id)}
                         className="qty-button minus"
                       >
                         −
                       </button>
                       <span className="quantity">{item.quantity}</span>
-                      <button 
-                        onClick={() => addToCart(item)} 
+                      <button
+                        onClick={() => addToCart(item)}
                         className="qty-button plus"
                       >
                         +
@@ -75,11 +79,12 @@ const CartSidebar = ({ selectedRestaurant }) => {
                 <span>Total:</span>
                 <span className="total-amount">${cartTotal.toFixed(2)}</span>
               </div>
-              <Button 
-                variant="success" 
-                size="large" 
+              <Button
+                variant="success"
+                size="large"
                 fullWidth
                 onClick={handleCheckout}
+                disabled={!selectedRestaurant || cart.length === 0}
               >
                 Checkout
               </Button>

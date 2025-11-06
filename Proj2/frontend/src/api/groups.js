@@ -37,8 +37,8 @@ export const updateGroup = async (groupId, groupData) => {
 };
 
 // Join a group
-export const joinGroup = async (groupId, username) => {
-  const response = await api.post(`/groups/${groupId}/join`, { username });
+export const joinGroup = async (groupId) => {
+  const response = await api.post(`/groups/${groupId}/join`);
   return response.data;
 };
 

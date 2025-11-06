@@ -25,7 +25,7 @@ export const CartProvider = ({ children }) => {
           : cartItem
       ));
     } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
+      setCart([...cart, { ...item, restaurantId: item.restaurantId, quantity: 1 }]);
     }
   };
 

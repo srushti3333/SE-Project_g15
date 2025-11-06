@@ -4,6 +4,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from extensions import db
 from models import Group, GroupMember
 from . import bp
+from .orders import parse_iso_utc
+from datetime import timezone
 
 # Get all groups
 @bp.route('/groups', methods=['GET'])
@@ -54,7 +56,7 @@ def create_group():
             restaurant_id=data['restaurant_id'],
             delivery_type=data['deliveryType'],
             delivery_location=data['deliveryLocation'],
-            next_order_time=datetime.fromisoformat(data['nextOrderTime'].replace('Z', '+00:00')),
+            next_order_time=parse_iso_utc(data['nextOrderTime']),
             max_members=data.get('maxMembers', 10)
         )
         db.session.add(new_group)
@@ -92,14 +94,15 @@ def update_group(group_id):
         if 'deliveryLocation' in data:
             group.delivery_location = data['deliveryLocation']
         if 'nextOrderTime' in data:
-            group.next_order_time = datetime.fromisoformat(data['nextOrderTime'].replace('Z', '+00:00'))
+            group.next_order_time = parse_iso_utc(data['nextOrderTime'])
         if 'maxMembers' in data:
             group.max_members = data['maxMembers']
         
-        group.updated_at = datetime.utcnow()
+        group.updated_at = datetime.utcnow().replace(tzinfo=timezone.utc)
         db.session.commit()
         
         return jsonify(group.to_dict()), 200
+    
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 400

@@ -22,7 +22,7 @@ function Dashboard() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [editingGroup, setEditingGroup] = useState(null);
   const [pollGroup, setPollGroup] = useState(null);
-  
+
   // Backend state
   const [myGroups, setMyGroups] = useState([]);
   const [allGroups, setAllGroups] = useState([]);
@@ -50,7 +50,7 @@ function Dashboard() {
     setLoading(true);
     setError('');
     try {
-      const groups = await getUserGroups(currentUser);
+      const groups = await getUserGroups();
       setMyGroups(groups);
     } catch (err) {
       console.error('Error fetching my groups:', err);
@@ -103,7 +103,7 @@ function Dashboard() {
   const handleJoinGroup = async (group) => {
     if (window.confirm(`Do you want to join "${group.name}"?`)) {
       try {
-        await joinGroup(group.id, currentUser);
+        await joinGroup(group.id);
         alert(`Successfully joined ${group.name}!`);
         fetchAllGroups(); // Refresh the list
         fetchMyGroups(); // Update my groups as well
@@ -193,11 +193,11 @@ function Dashboard() {
                 />
               </div>
             )}
-            
+
             {!selectedGroup && (
               <>
                 <h2 className="page-title">My Groups</h2>
-                
+
                 {error && (
                   <div className="error-banner">
                     {error}
@@ -215,8 +215,8 @@ function Dashboard() {
                     <p className="empty-state-subtitle">
                       Browse available groups or create a pool when ordering!
                     </p>
-                    <Button 
-                      variant="primary" 
+                    <Button
+                      variant="primary"
                       onClick={() => setCurrentPage(PAGES.FIND_GROUPS)}
                     >
                       Find Groups
@@ -243,7 +243,7 @@ function Dashboard() {
         {currentPage === PAGES.FIND_GROUPS && (
           <div>
             <h2 className="page-title">Find Groups</h2>
-            
+
             {error && (
               <div className="error-banner">
                 {error}
@@ -282,11 +282,23 @@ function Dashboard() {
         {currentPage === PAGES.EDIT_GROUP && editingGroup && (
           <EditGroupPage
             group={editingGroup}
-            onSave={(updated) => {
-              console.log("Saved updated group", updated);
+            onSave={(updatedGroup) => {
+              console.log("Saved updated group", updatedGroup);
+
+              // Instantly update the edited group in state
+              setMyGroups((prevGroups) =>
+                prevGroups.map((g) => (g.id === updatedGroup.id ? updatedGroup : g))
+              );
+
+              // If this group is currently open in detail view, update it too
+              setSelectedGroup((prev) =>
+                prev && prev.id === updatedGroup.id ? updatedGroup : prev
+              );
+
+              // Close edit page and refresh as backup (optional)
               setEditingGroup(null);
               setCurrentPage(PAGES.MY_GROUPS);
-              fetchMyGroups(); // Refresh groups
+              fetchMyGroups(); // optional fallback to ensure backend sync
             }}
             onCancel={() => {
               setEditingGroup(null);

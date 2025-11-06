@@ -4,7 +4,7 @@
   background: white;
   border: 2px solid #e5e7eb;
   border-radius: 16px;
-  padding: 24px;
+  padding: 24x;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -48,4 +48,35 @@
   background: #d1fae5;
   border-radius: 8px;
   display: inline-block;
+}
+
+.group-countdown {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  background: #f9fafb;
+  padding: 6px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.group-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.group-detail-status {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.group-detail-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
