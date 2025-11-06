@@ -32,3 +32,8 @@ export const deleteGroupOrder = async (groupId) => {
 export const placeImmediateOrder = async (groupId, items) => {
   return api.post(`/groups/${groupId}/orders/immediate`, { items });
 };
+
+export const getPastOrders = async () => {
+  const response = await api.get('/profile/orders');
+  return response.data;
+};

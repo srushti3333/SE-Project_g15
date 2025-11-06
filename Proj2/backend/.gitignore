@@ -31,3 +31,5 @@ backend/.pytest_cache
 
 */migrations/*
 migrations/
+*/uploads/*
+uploads/

@@ -14,3 +14,9 @@ def profile_get():
 @jwt_required()
 def profile_update():
     return update_profile()
+
+@profile_bp.route('/orders', methods=['GET'])
+@jwt_required()
+def profile_orders():
+    from controllers.profile_controller import get_past_orders
+    return get_past_orders()

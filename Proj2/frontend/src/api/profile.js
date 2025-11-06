@@ -5,7 +5,9 @@ export const fetchProfile = async () => {
   return response.data;
 };
 
-export const updateProfile = async (profileData) => {
-  const response = await API.put("/profile", profileData);
+export const updateProfile = async (profileData, config = {}) => {
+  const response = await API.put("/profile", profileData, config);
   return response.data;
 };
+
+
