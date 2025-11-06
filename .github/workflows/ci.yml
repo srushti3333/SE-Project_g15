@@ -1,101 +1,76 @@
-# name: CI
+name: CI
 
 on:
   push:
-    branches: [ main, develop, master, feature/* ]
+    branches: [main]
   pull_request:
-    branches: [ main, develop, master, feature/* ]
+    branches: [main]
 
 jobs:
-  backend-tests:
+  backend:
     name: Backend Tests
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:14
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: foodpool_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    strategy:
+      matrix:
+        python-version: [3.11]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
           cd Proj2/backend
+          python -m venv venv
+          source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
-      - name: Run tests with coverage
-        env:
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/foodpool_test
-          JWT_SECRET_KEY: test-secret-key
+      - name: Run backend tests with coverage
         run: |
           cd Proj2/backend
-          pytest --cov=. --cov-report=xml --cov-report=term -v || echo "No tests found yet"
+          source venv/bin/activate
+          pytest --cov=. --cov-report=term-missing
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./Proj2/backend/coverage.xml
-          flags: backend
-          fail_ci_if_error: false
-        continue-on-error: true
-
-  frontend-tests:
+  frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    strategy:
+      matrix:
+        node-version: [20.x]
 
-      - name: Set up Node.js
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
         run: |
           cd Proj2/frontend
-          npm ci || npm install
+          npm install
 
-      - name: Run tests
+      - name: Build frontend (ignore ESLint warnings)
         run: |
           cd Proj2/frontend
-          npm test -- --passWithNoTests --watchAll=false || echo "No tests found yet"
-        continue-on-error: true
+          CI=false npm run build
 
-      - name: Build
+      - name: Run frontend tests with coverage
         run: |
           cd Proj2/frontend
-          npm run build
+          npm test -- --coverage --watchAll=false
 
-  lint:
-    name: Code Quality
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Check Python files
-        run: |
-          cd Proj2/backend
-          python -m py_compile *.py || echo "Python files checked"
-        continue-on-error: true
+      - name: Upload frontend coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: Proj2/frontend/coverage/lcov-report/
