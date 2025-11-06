@@ -15,8 +15,9 @@ const Profile = () => {
   const [orders, setOrders] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [ordersOpen, setOrdersOpen] = useState(false);
 
-  const navigate = useNavigate(); // ✅ navigation hook
+  const navigate = useNavigate(); 
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -152,29 +153,44 @@ const Profile = () => {
           )}
 
           <hr />
-          <h3>🧾 Past Orders</h3>
-          <div className="orders-container">
-            {orders.length === 0 && <p>No past orders yet.</p>}
-            {orders.map(order => {
-              const date = new Date(order.orderDate.split('.')[0]);
-              return (
-                <div key={order.orderId} className="order-card">
-                  <div className="order-header">
-                    <span className="order-group">{order.groupName}</span>
-                    <span className="order-date">{date.toLocaleDateString()}</span>
+          {/* Collapsible Past Orders */}
+          <h3
+            className="collapsible-header"
+            style={{ cursor: "pointer" }}
+            onClick={() => setOrdersOpen(!ordersOpen)}
+          >
+            🧾 Past Orders {ordersOpen ? "▲" : "▼"}
+          </h3>
+
+          {ordersOpen && (
+            <div className="orders-container">
+              {orders.length === 0 && <p>No past orders yet.</p>}
+              {orders.map(order => {
+                const date = new Date(order.orderDate.split('.')[0]);
+                return (
+                  <div key={order.orderId} className="order-card">
+                    <div className="order-header">
+                      <span className="order-group">{order.groupName}</span>
+                      <span className="order-date">{date.toLocaleDateString()}</span>
+                    </div>
+                    <ul className="order-items">
+                      {order.items.map(item => (
+                        <li key={item.id} className="order-item">
+                          <span className="order-item-name">{getItemName(order.restaurantId, item.menuItemId)}</span>
+                          <span className="order-item-qty">Qty: {item.quantity}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="order-items">
-                    {order.items.map(item => (
-                      <li key={item.id} className="order-item">
-                        <span className="order-item-name">{getItemName(order.restaurantId, item.menuItemId)}</span>
-                        <span className="order-item-qty">Qty: {item.quantity}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
+          
+          {/* ✅ Logout Button */}
+          <button className="logout-button" onClick={handleLogout}>
+            Logout
+          </button>
         </div>
       </div>
     </>
