@@ -51,6 +51,30 @@ FoodPool enables community-driven pooled food orders, letting nearby users combi
 
 ---
 
+### 📚 Case Studies
+
+**1. Student Dorm Meal Pooling**  
+- 🏫 **Scenario:** Students living in the same dorm wanted to save on individual meal delivery fees.  
+- 🍔 **Solution:** They created a shared pool on FoodPool to combine lunch orders.  
+- 🎯 **Outcome:** Members enjoyed lower delivery costs, real-time order updates, and a simplified payment process. Social interaction among dorm residents increased.  
+
+**2. Office Lunch Pooling**  
+- 🏢 **Scenario:** A 12-person office frequently ordered lunch separately, causing higher delivery charges and coordination issues.  
+- 🍽️ **Solution:** The team consolidated their orders using FoodPool for the entire week.  
+- 🎯 **Outcome:** Delivery fees were reduced by $2–$5 per meal, orders arrived more efficiently, and employees saved time. The built-in chat facilitated quick coordination.  
+
+**3. Festival Event Catering**  
+- 🎉 **Scenario:** A community festival needed meals for 50 attendees from multiple vendors.  
+- 🍱 **Solution:** Event organizers used FoodPool to manage bulk orders and track participants.  
+- 🎯 **Outcome:** Total food costs were reduced by 20%, delivery logistics were simplified, and attendees enjoyed a seamless, community-driven ordering experience.  
+
+**4. Co-Living Space Meal Coordination**  
+- 🏠 **Scenario:** Residents in a co-living apartment wanted to coordinate weekly grocery and meal deliveries.  
+- 🛒 **Solution:** Recurring pools were created on FoodPool to manage shared orders efficiently.  
+- 🎯 **Outcome:** Residents saved $10–$15 per week, avoided duplicate orders, maintained transparency in expenses, and improved communication within the group.  
+
+---
+
  🛠️ Tech Stack
 
 | Layer | Technology |
