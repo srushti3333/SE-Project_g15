@@ -10,7 +10,7 @@ The repository contains submissions for Software Engineering project done by Gro
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
 ![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)
 ![Pylint](https://img.shields.io/badge/lint-pylint-yellowgreen)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.xxxxx.svg)](https://doi.org/10.5281/zenodo.17547440)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17547440.svg)](https://doi.org/10.5281/zenodo.17547440)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/flask-3.0.3-green.svg)](https://flask.palletsprojects.com/)
 [![React](https://img.shields.io/badge/react-18.0-blue.svg)](https://reactjs.org/)
@@ -23,7 +23,7 @@ The repository contains submissions for Software Engineering project done by Gro
 
  📹 Demo Video
 
-🎥 [Watch our demo here](YOUR_VIDEO_LINK)
+🎥 [Watch our demo here](https://drive.google.com/file/d/1axWr_0DzbPB18q4z_mSvZ5vTAb1d4ghk/view)
 
 ---
 
@@ -246,11 +246,7 @@ git push origin feature/your-feature
 ---
  📞 Discussion Forum
 
-[![Discussion Forum](https://img.shields.io/badge/Discussion-Join%20Us-blue?style=for-the-badge)](YOUR_FORUM_LINK)
-
-QR Code for Mobile Access:
-
-![Discussion QR Code](docs/images/discussion-qr.png)
+[![Discussion Forum](https://img.shields.io/badge/Discussion-Join%20Us-blue?style=for-the-badge)](https://discord.com/invite/QNRheurx)
 
 ---
 
@@ -310,8 +306,8 @@ All pull requests require:
  📧 Contact
 
 - GitHub Issues: [Report bugs or request features](https://github.com/srushti3333/SE-Project_g15/issues)
-- Discussion Forum: [Join the community](YOUR_FORUM_LINK)
-- Email: Contact any team member
+- Discussion Forum: [Join the community](https://discord.com/invite/QNRheurx)
+- Email: sthakar2@ncsu.edu, stpatel4@ncsu.edu, vpatel34@ncsu.edu, dbpatel5@ncsu.edu
 
 ---
 
