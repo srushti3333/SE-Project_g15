@@ -3,13 +3,19 @@ The repository contains submissions for Software Engineering project done by Gro
 
 # 🍕 FoodPool: Eat Together. Save Together.
 
-[![Build Status](https://github.com/srushti3333/SE-Project_g15/workflows/CI/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
+[![Build Status](https://github.com/srushti3333/SE-Project_g15/actions/workflows/ci.yml/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
 [![codecov](https://codecov.io/gh/srushti3333/SE-Project_g15/branch/main/graph/badge.svg)](https://codecov.io/gh/srushti3333/SE-Project_g15)
+![Flake8](https://img.shields.io/badge/style-flake8-blue)
+![ESLint](https://img.shields.io/badge/lint-eslint-purple)
+![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
+![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)
+![Pylint](https://img.shields.io/badge/lint-pylint-yellowgreen)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.xxxxx.svg)](https://doi.org/10.5281/zenodo.xxxxx)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/flask-3.0.3-green.svg)](https://flask.palletsprojects.com/)
 [![React](https://img.shields.io/badge/react-18.0-blue.svg)](https://reactjs.org/)
 [![PostgreSQL](https://img.shields.io/badge/postgresql-14%2B-blue.svg)](https://www.postgresql.org/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > Community-driven pooled food ordering platform that saves costs, reduces delivery inefficiency, and promotes eco-friendly practices.
 
@@ -131,21 +137,24 @@ Test Coverage: 100+ test cases covering nominal and off-nominal scenarios
 SE-Project_g15/
 ├── backend/
 │   ├── app.py              # Flask entry point
-│   ├── models.py           # Database models
-│   ├── routes.py           # API endpoints
+│   ├── models/             # Database models
+│   ├── controllers/        # Relevant controllers
+│   ├── routes/             # API endpoints
 │   ├── requirements.txt    # Dependencies
+│   ├── .env    # Dependencies
 │   └── tests/              # Backend tests
 │
 ├── frontend/
 │   ├── src/
 │   │   ├── App.jsx
-│   │   ├── routes/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   └── context/
-│   ├── package.json
-│   └── tests/              # Frontend tests
-│
+│   │   ├── pages/          # Frontend tests present with each related file 
+│   │   ├── components/     # Common Components & Frontend tests present with each related file 
+│   │   └── context/        # App context
+│   │   └── routes/         # App route setup
+│   │   └── utils/          # Common utility constants
+│   │   └── hooks/          # Common hooks to use
+│   │   ├── setupTests.js
+│   └──  package.json        
 └── .github/
     └── workflows/
         └── ci.yml          # CI/CD pipeline
@@ -199,16 +208,25 @@ QR Code for Mobile Access:
  📊 Project Milestones
 
 # ✅ Release 1 (October 2024)
-- Web UI/UX Design
-- Authentication & Location Services
-- Restaurant & Menu Management
-- Cart & Checkout System
+
+🔐 Authentication & User Profiles – Secure signup/login, profile management, password updates, location capture
+
+🍴 Restaurant Discovery & Menu System – Browse restaurants, view detailed menus, item cards with descriptions and pricing
+
+🛒 Smart Cart & Group Pooling – Multi-item cart, three checkout modes (order alone, create group, join group), order history tracking
+
+🗳️ Collaborative Polling & Group Management – In-group polls, real-time voting, group status tracking, countdown timers
+
 
 # 🚀 Release 2 (November 2024)
-- Delivery Partner Portal
-- Public Pool Discovery
-- Dual-Layer Rewards System
-- Gamified Analytics & Eco-Impact
+
+📍 Location Intelligence & Delivery Optimization – Smart zone clustering, delivery partner portal, route optimization, real-time tracking with live ETAs
+
+🌐 Public Pool Discovery & Social Features – Interactive map view, nearby group discovery, QR code sharing, user ratings, in-app messaging
+
+🎁 Dual-Layer Rewards & Incentive System – Restaurant partnerships with volume discounts, loyalty points program, tiered memberships, cashback rewards
+
+⭐ Gamification & Sustainability Analytics – Leaderboards, 50+ achievement badges, streak rewards, eco-impact dashboard, personal spending analytics
 
 ---
 
