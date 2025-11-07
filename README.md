@@ -252,7 +252,7 @@ git push origin feature/your-feature
 
  📊 Project Milestones
 
-# ✅ Release 1 (October 2024)
+# ✅ Release 1 (October 2025)
 
  🧠 **Core Platform Architecture** - Stable backend and modular API ecosystem enabling real-time data sync, scalability, and secure operations across all modules.
  
@@ -263,7 +263,7 @@ git push origin feature/your-feature
 ⚡ **Real-Time Interaction Framework** - Low-latency polling, instant decision updates, and countdown-based coordination driving group synchronization and engagement.
 
 
-# 🚀 Release 2 (November 2024)
+# 🚀 Release 2 (November 2025)
 
 📍 **AI-Powered Delivery Optimization** - Predictive routing, demand clustering, and adaptive ETA generation through real-time location intelligence.
 
