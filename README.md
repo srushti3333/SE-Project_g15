@@ -10,7 +10,7 @@ The repository contains submissions for Software Engineering project done by Gro
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
 ![Code style: prettier](https://img.shields.io/badge/code%20style-prettier-ff69b4.svg)
 ![Pylint](https://img.shields.io/badge/lint-pylint-yellowgreen)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.xxxxx.svg)](https://doi.org/10.5281/zenodo.xxxxx)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.xxxxx.svg)](https://doi.org/10.5281/zenodo.17547440)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/flask-3.0.3-green.svg)](https://flask.palletsprojects.com/)
 [![React](https://img.shields.io/badge/react-18.0-blue.svg)](https://reactjs.org/)
