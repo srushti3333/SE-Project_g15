@@ -12,16 +12,62 @@ Make sure you have the following installed on your system:
 - PostgreSQL (if using a database backend)
 ---
 
-## 🚀 Backend Setup (Flask)
+## ⚡ One-Command Setup (Simplest)
 
-### 1.  Clone the Repository
+We provide scripts for a full setup of backend, frontend, and PostgreSQL.
+
+### Linux/macOS
+
+Use the `Makefile` included in the repo:
+
+From your Proj2 folder,
+
+```bash
+make all
+```
+
+### Windows
+
+Run the setup_all.bat script:
+```
+call Proj2\scripts\setup_all.bat
+```
+---
+
+## Option A: Automated Setup (Recommended)
+
+### 🚀 Backend & Frontend Setup (Flask + React)
+
+You can use the provided scripts to set up backend, frontend, and PostgreSQL automatically.
+
+- **Linux/macOS**:
+```bash
+bash Proj2/scripts/setup_postgres.sh
+bash Proj2/scripts/install_backend.sh
+bash Proj2/scripts/install_frontend.sh
+```
+
+- **Windows**:
+```bat
+call Proj2\scripts\setup_postgres.bat
+call Proj2\scripts\install_backend.bat
+call Proj2\scripts\install_frontend.bat
+```
+
+**⚠️ If the scripts fail for any reason, follow Option B below to set up manually.**
+
+## Option B: Manual Setup
+
+### 🚀 Backend Setup (Flask)
+
+#### 1.  Clone the Repository
 
 ```bash 
 git clone https://github.com/<your-username>/<your-repo>.git
 cd <your-repo>/backend
 ```
 
-### 2.  Create and Activate Virtual Environment
+#### 2.  Create and Activate Virtual Environment
 
 ```
 python -m venv venv
@@ -29,14 +75,14 @@ source venv/bin/activate     # On macOS/Linux
 venv\Scripts\activate        # On Windows
 ```
 
-### 3.  Install Dependencies
+#### 3.  Install Dependencies
 ```
 pip install -r requirements.txt
 ```
 
-### 4.  Set Up PostgreSQL Database
+#### 4.  Set Up PostgreSQL Database
    
-  Create a PostgreSQL User and Database
+  ##### Create a PostgreSQL User and Database
 
   4.1.  Open the PostgreSQL shell (or use pgAdmin):
   ```
@@ -63,7 +109,7 @@ pip install -r requirements.txt
   \q
   ```
 
-### 5.  Configure Environment Variables
+#### 5.  Configure Environment Variables
 
 Create a .env file in the backend directory with the following:
 ```
@@ -78,14 +124,14 @@ DB_PASSWORD=...YourBDPassword
 JWT_SECRET=...YourSecret
 ```
 
-### 6.  Run Database Migrations
+#### 6.  Run Database Migrations
 ```
 flask db init
 flask db migrate -m "Initial migration"
 flask db upgrade
 ```
 
-### 7.  Start the Flask Server
+#### 7.  Start the Flask Server
 ```
 flask run
 ```
@@ -94,20 +140,34 @@ flask run
 
 --- 
 
-## 💻 Frontend Setup (React)
+### 💻 Frontend Setup (React)
 
-### 1.  Navigate to Frontend Folder
+### Option A: Using scripts (Recommended)
+
+Linux/macOS:
+```
+bash scripts/install_frontend.sh
+```
+
+Windows:
+```
+call scripts\install_frontend.bat
+```
+
+### Option B: Manual Setup
+
+#### 1.  Navigate to Frontend Folder
 
 ```
 cd ../frontend
 ```
 
-### 2.  Install Dependencies
+#### 2.  Install Dependencies
 ```
 npm install
 ```
 
-### 3.  Start the Frontend
+#### 3.  Start the Frontend
 ```
 npm start
 ```
@@ -157,3 +217,4 @@ Your application should now be running successfully with:
 
 - Backend: http://localhost:5000 
 - Frontend: http://localhost:3000 
+
