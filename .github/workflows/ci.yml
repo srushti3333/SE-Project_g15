@@ -50,12 +50,12 @@ jobs:
           pytest --cov=. --cov-report=xml --cov-report=term -v || echo "No tests found yet"
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: ./Proj2/backend/coverage.xml
-          flags: Proj2/backend
+          flags: backend
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
-        continue-on-error: true
 
   frontend-tests:
     name: Frontend Tests
@@ -75,11 +75,19 @@ jobs:
           cd Proj2/frontend
           npm ci || npm install
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
           cd Proj2/frontend
-          npm test -- --passWithNoTests --watchAll=false || echo "No tests found yet"
+          npm test -- --coverage --passWithNoTests --watchAll=false || echo "No tests found yet"
         continue-on-error: true
+
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./Proj2/frontend/coverage/lcov.info
+          flags: frontend
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
       - name: Build
         run: |
