@@ -308,6 +308,14 @@ All pull requests require:
 
 ---
 
+### 📖 How to Cite
+
+If you use **FoodPool** in your research, projects, or presentations, please cite it using the metadata provided in our [CITATION.cff](CITATION.cff) file.  
+
+This file can be used with citation tools to automatically generate BibTeX, RIS, or other formats.
+
+---
+
  🙏 Acknowledgments
 
 Built with ❤️ by Group 15 for Software Engineering Course
