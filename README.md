@@ -208,16 +208,16 @@ QR Code for Mobile Access:
  📊 Project Milestones
 
 # ✅ Release 1 (October 2024)
-- Web UI/UX Design
-- Authentication & Location Services
-- Restaurant & Menu Management
-- Cart & Checkout System
+🔐 Authentication & User Profiles – Secure signup/login, profile management, password updates, location capture
+🍴 Restaurant Discovery & Menu System – Browse restaurants, view detailed menus, item cards with descriptions and pricing
+🛒 Smart Cart & Group Pooling – Multi-item cart, three checkout modes (order alone, create group, join group), order history tracking
+🗳️ Collaborative Polling & Group Management – In-group polls, real-time voting, group status tracking, countdown timers
 
 # 🚀 Release 2 (November 2024)
-- Delivery Partner Portal
-- Public Pool Discovery
-- Dual-Layer Rewards System
-- Gamified Analytics & Eco-Impact
+📍 Location Intelligence & Delivery Optimization – Smart zone clustering, delivery partner portal, route optimization, real-time tracking with live ETAs
+🌐 Public Pool Discovery & Social Features – Interactive map view, nearby group discovery, QR code sharing, user ratings, in-app messaging
+🎁 Dual-Layer Rewards & Incentive System – Restaurant partnerships with volume discounts, loyalty points program, tiered memberships, cashback rewards
+⭐ Gamification & Sustainability Analytics – Leaderboards, 50+ achievement badges, streak rewards, eco-impact dashboard, personal spending analytics
 
 ---
 
