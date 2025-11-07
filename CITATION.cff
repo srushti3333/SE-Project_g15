@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the following metadata."
+title: "FoodPool: Eat Together. Save Together."
+version: "1.0.0"
+doi: "10.5281/zenodo.xxxxx"  # Replace with actual DOI
+authors:
+  - family-names: "Patel"
+    given-names: "Sakhi"
+  - family-names: "Patel"
+    given-names: "Dev"
+  - family-names: "Thakar"
+    given-names: "Srushti"
+  - family-names: "Patel"
+    given-names: "Vaishvi"
+date-released: 2024-11-30
+url: "https://github.com/srushti3333/SE-Project_g15"
