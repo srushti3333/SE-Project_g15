@@ -156,6 +156,31 @@ Test Coverage: 100+ test cases covering nominal and off-nominal scenarios
 
 ---
 
+🛠️ Troubleshooting
+
+If you encounter issues while setting up or running FoodPool, try the following steps:
+
+1. **Backend server not starting**  
+   - Ensure your virtual environment is activated (`source venv/bin/activate` or `venv\Scripts\activate` on Windows).  
+   - Verify that PostgreSQL is running and `DATABASE_URL` in `.env` is correct.  
+   - Check for missing dependencies and run `pip install -r requirements.txt`.
+
+2. **Frontend issues or blank screen**  
+   - Ensure `npm install` has completed successfully.  
+   - Verify that `.env` contains `REACT_APP_API_URL` pointing to the backend server (`http://localhost:5000/api`).  
+   - Restart the development server using `npm start`.
+
+3. **Database connection errors**  
+   - Confirm that PostgreSQL credentials (user, password, database name) match the `.env` file.  
+   - Ensure that the database exists and the user has proper privileges.
+
+4. **General errors**  
+   - Check the console logs (browser for frontend, terminal for backend) for error messages.  
+   - Search for the error in GitHub Issues or post a new issue if it has not been reported.  
+   - Consult the discussion forum for tips from other users.
+
+---
+
  📁 Project Structure
 ```
 SE-Project_g15/
