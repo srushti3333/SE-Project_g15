@@ -4,7 +4,7 @@ The repository contains submissions for Software Engineering project done by Gro
 # 🍕 FoodPool: Eat Together. Save Together.
 
 [![Build Status](https://github.com/srushti3333/SE-Project_g15/actions/workflows/ci.yml/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
-[![codecov](https://codecov.io/gh/srushti3333/SE-Project_g15/branch/codecov-test/graph/badge.svg)](https://codecov.io/gh/srushti3333/SE-Project_g15)
+[![codecov](https://codecov.io/gh/srushti3333/SE-Project_g15/graph/badge.svg?token=R1FHWXT0ML)](https://codecov.io/gh/srushti3333/SE-Project_g15)
 
 ![Flake8](https://img.shields.io/badge/style-flake8-blue)
 ![ESLint](https://img.shields.io/badge/lint-eslint-purple)
