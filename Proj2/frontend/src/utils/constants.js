@@ -1,8 +1,9 @@
-// src/utils/constants.js
 // API base URL
+/** Base URL for the backend API */
 export const API_BASE_URL = "http://localhost:5000/api";
 
 // Mock restaurant data
+/** Array of mock restaurant objects with menu, location, and offers */
 export const RESTAURANTS = [
   {
     id: 1,
@@ -59,6 +60,7 @@ export const RESTAURANTS = [
 ];
 
 // Mock groups data
+/** Array of mock group objects with basic info: name, members, next order time */
 export const GROUPS = [
   { id: 1, name: "Office Lunch Crew", members: 8, nextOrder: "Today 11:30 PM" },
   { id: 2, name: "Weekend Foodies", members: 12, nextOrder: "Saturday 7:00 PM" },
@@ -66,6 +68,7 @@ export const GROUPS = [
 ];
 
 // Mock group details data
+/** Object mapping group IDs to detailed information including members, menu, and delivery */
 export const GROUP_DETAILS = {
   1: {
     id: 1,
@@ -119,6 +122,7 @@ export const GROUP_DETAILS = {
 };
 
 // Mock nearby pools data
+/** Array of nearby pool objects with current members, organizer, delivery location, and estimated savings */
 export const NEARBY_POOLS = [
   {
     id: 1,
@@ -159,6 +163,7 @@ export const NEARBY_POOLS = [
 ];
 
 // Configuration constants
+/** Object holding configurable app settings like delivery fee, pool times, and member limits */
 export const CONFIG = {
   DELIVERY_FEE: 5.99,
   ESTIMATED_DELIVERY_TIME: "30-40 min",
@@ -171,6 +176,7 @@ export const CONFIG = {
 };
 
 // Page names
+/** Object holding names of frontend pages for routing */
 export const PAGES = {
   HOME: 'home',
   MY_GROUPS: 'mygroups',
@@ -180,12 +186,15 @@ export const PAGES = {
 };
 
 // Order options
+/** Enum for order type selections in UI */
 export const ORDER_OPTIONS = {
   NOW: 'now',
   CREATE: 'create',
   JOIN: 'join'
 };
 
+// Group polls
+/** Object mapping group IDs to arrays of poll objects */
 export const GROUP_POLLS = {
   1: [
     {
