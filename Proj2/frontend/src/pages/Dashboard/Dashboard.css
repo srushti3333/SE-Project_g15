@@ -1,9 +1,13 @@
+/* 
+ * Dashboard Container Styles
+ * Main container for the dashboard with gradient background
+ */
 .dashboard-container {
   min-height: 100vh;
   background: linear-gradient(to bottom right, #e0f2fe, #dbeafe);
 }
 
-/* Navbar */
+/* Navbar Styles */
 .dashboard-navbar {
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -86,7 +90,7 @@
   font-weight: bold;
 }
 
-/* Main Content */
+/* Main Content Area */
 .main-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -100,7 +104,7 @@
   margin-bottom: 24px;
 }
 
-/* Restaurant Grid */
+/* Restaurant Grid Layout */
 .restaurant-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -149,7 +153,7 @@
   margin-top: 12px;
 }
 
-/* Restaurant Detail */
+/* Restaurant Detail Page Styles */
 .back-button {
   background: none;
   border: none;
@@ -205,7 +209,7 @@
   display: inline-block;
 }
 
-/* Menu */
+/* Menu Section Styles */
 .menu-title {
   font-size: 24px;
   font-weight: bold;
@@ -272,7 +276,7 @@
   background-color: #1d4ed8;
 }
 
-/* Groups */
+/* Groups Section Styles */
 .groups-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -339,7 +343,7 @@
   background-color: #047857;
 }
 
-/* Cart Sidebar */
+/* Cart Sidebar Styles */
 .cart-overlay {
   position: fixed;
   inset: 0;
@@ -516,7 +520,7 @@
   background-color: #1d4ed8;
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
   .cart-sidebar {
     width: 100%;
@@ -538,8 +542,7 @@
   }
 }
 
-
-
+/* Utility and State Styles */
 .loading-state {
   text-align: center;
   padding: 60px 20px;
@@ -589,7 +592,7 @@
   margin: 0;
 }
 
-/* Filter Bar */
+/* Filter Bar Styles */
 .filters-bar {
   display: flex;
   flex-wrap: wrap;
