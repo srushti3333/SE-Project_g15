@@ -115,3 +115,15 @@ test('updates selection and re-renders summary', async () => {
 });
 
 });
+
+test("handles empty group API response", async () => {
+  groupApi.getGroups.mockResolvedValueOnce([]);
+  render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
+  await waitFor(() => expect(screen.getByText(/no groups available/i)).toBeInTheDocument());
+});
+
+test("renders correctly with existing cart items", async () => {
+  useCart.mockReturnValue({ cart: [{ id: 1, name: "Pizza" }], addToCart: jest.fn(), removeFromCart: jest.fn() });
+  render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
+  expect(screen.getByText(/pizza/i)).toBeInTheDocument();
+});

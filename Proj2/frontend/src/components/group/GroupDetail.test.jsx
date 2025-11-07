@@ -6,12 +6,10 @@ import * as groupsApi from '../../api/groups';
 import * as ordersApi from '../../api/orders';
 import { RESTAURANTS } from '../../utils/constants';
 
-// Mock the CartContext hook
 jest.mock('../../context/CartContext', () => ({
   useCart: jest.fn(),
 }));
 
-// Mock the API modules
 jest.mock('../../api/groups', () => ({
   getGroupPolls: jest.fn(),
   voteOnPoll: jest.fn(),
@@ -22,7 +20,6 @@ jest.mock('../../api/orders', () => ({
   deleteGroupOrder: jest.fn(),
 }));
 
-// Mock constants
 jest.mock('../../utils/constants', () => ({
   RESTAURANTS: [
     {
@@ -74,7 +71,6 @@ describe('GroupDetail Component', () => {
 
   it('renders group details correctly', async () => {
     render(<GroupDetail {...props} />);
-
     expect(await screen.findByText('Lunch Squad')).toBeInTheDocument();
     expect(screen.getByText(/Alice, Bob/)).toBeInTheDocument();
     expect(screen.getByText(/Student Center/)).toBeInTheDocument();
@@ -89,18 +85,20 @@ describe('GroupDetail Component', () => {
 
   it('toggles polls section on button click', async () => {
     render(<GroupDetail {...props} />);
-
     const toggleButton = screen.getByRole('button', { name: /View Polls/i });
     fireEvent.click(toggleButton);
-
     await waitFor(() => {
       expect(groupsApi.getGroupPolls).toHaveBeenCalledWith(123);
     });
-
     expect(await screen.findByText(/No polls yet/i)).toBeInTheDocument();
-
-    // Hide polls again
     fireEvent.click(screen.getByRole('button', { name: /Hide Polls/i }));
+  });
+
+  it('handles poll toggle errors gracefully', async () => {
+    groupsApi.getGroupPolls.mockRejectedValueOnce(new Error('Failed'));
+    render(<GroupDetail {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: /View Polls/i }));
+    await waitFor(() => expect(screen.getByText(/error/i)).toBeInTheDocument());
   });
 
   it('calls placeGroupOrder when placing an order', async () => {
@@ -109,16 +107,12 @@ describe('GroupDetail Component', () => {
       cart: [{ id: 101, quantity: 2, restaurantId: 1 }],
     };
     useCart.mockReturnValue(filledCart);
-
     render(<GroupDetail {...props} />);
-
     const button = await screen.findByRole('button', { name: /Place \/ Update Order/i });
     window.alert = jest.fn();
-
     await act(async () => {
       fireEvent.click(button);
     });
-
     await waitFor(() => {
       expect(ordersApi.placeGroupOrder).toHaveBeenCalled();
     });
@@ -133,26 +127,21 @@ describe('GroupDetail Component', () => {
     ordersApi.getGroupOrders.mockResolvedValue([userOrder]);
     window.confirm = jest.fn(() => true);
     window.alert = jest.fn();
-
     render(<GroupDetail {...props} />);
-
     await waitFor(() => {
       expect(screen.getByText(/Delete My Order/i)).toBeInTheDocument();
     });
-
     fireEvent.click(screen.getByText(/Delete My Order/i));
     await waitFor(() => expect(ordersApi.deleteGroupOrder).toHaveBeenCalled());
   });
 
   it('calls edit, close, and create poll callbacks', async () => {
     render(<GroupDetail {...props} />);
-
     fireEvent.click(screen.getByRole('button', { name: /Create Poll/i }));
     fireEvent.click(screen.getByRole('button', { name: /Close/i }));
-    // Edit button visible only to organizer, so switch current user
+    // Edit button visible only to organizer
     localStorage.setItem('username', 'Alice');
     render(<GroupDetail {...props} />);
-
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Edit Group/i })).toBeInTheDocument();
     });
@@ -162,11 +151,15 @@ describe('GroupDetail Component', () => {
     render(<GroupDetail {...props} />);
     const countdown = await screen.findByText(/Countdown:/);
     expect(countdown).toBeInTheDocument();
-
     act(() => {
       jest.advanceTimersByTime(2000);
     });
-
     expect(screen.getByText(/Countdown:/)).toBeInTheDocument();
+  });
+
+  it('shows expired countdown as 00:00', async () => {
+    const expiredGroup = { ...mockGroup, nextOrderTime: new Date(Date.now() - 1000).toISOString() };
+    render(<GroupDetail {...props} group={expiredGroup} />);
+    expect(await screen.findByText(/Countdown:/)).toBeInTheDocument();
   });
 });
