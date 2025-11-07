@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop, master, feature/* ]
+    branches: [ main, develop, master, feature/*, codecov-test ]
   pull_request:
-    branches: [ main, develop, master, feature/* ]
+    branches: [ main, develop, master, feature/*, codecov-test ]
 
 jobs:
   backend-tests:
@@ -33,27 +33,56 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
           cd Proj2/backend
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov coverage
 
       - name: Run tests with coverage
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/foodpool_test
           JWT_SECRET_KEY: test-secret-key
+          FLASK_ENV: testing
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: foodpool_test
+          DB_USER: postgres
+          DB_PASSWORD: postgres
         run: |
           cd Proj2/backend
-          pytest --cov=. --cov-report=xml --cov-report=term -v || echo "No tests found yet"
+          echo "Current directory: $(pwd)"
+          echo "Python version: $(python --version)"
+          echo "Pip list:"
+          pip list | grep -E "(pytest|coverage|flask)"
+          echo "Running the same command that works locally..."
+          python -m pytest --cov=. --cov-report=xml --cov-report=html -v
+          echo "Pytest exit code: $?"
+          echo "Checking for coverage files:"
+          ls -la coverage.xml || echo "No coverage.xml found"
+          ls -la htmlcov/ || echo "No htmlcov directory found"
+        continue-on-error: true
+
+      - name: Check coverage file
+        run: |
+          cd Proj2/backend
+          echo "Checking for coverage files..."
+          ls -la *.xml || echo "No XML files found"
+          ls -la coverage.xml || echo "No coverage.xml found"
+          if [ -f coverage.xml ]; then
+            echo "Coverage file exists, size: $(wc -c < coverage.xml) bytes"
+            head -20 coverage.xml
+          fi
+        continue-on-error: true
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           files: ./Proj2/backend/coverage.xml
-          flags: Proj2/backend
+          flags: backend
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: false
         continue-on-error: true
 
@@ -75,11 +104,20 @@ jobs:
           cd Proj2/frontend
           npm ci || npm install
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: |
           cd Proj2/frontend
-          npm test -- --passWithNoTests --watchAll=false || echo "No tests found yet"
+          npm test -- --coverage --passWithNoTests --watchAll=false || echo "No tests found yet"
+          ls -la coverage/ || echo "No coverage directory found"
         continue-on-error: true
+
+      - name: Upload frontend coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./Proj2/frontend/coverage/lcov.info
+          flags: frontend
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
 
       - name: Build
         run: |

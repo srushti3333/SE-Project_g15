@@ -1,0 +1,35 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+        base: auto
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+        base: auto
+
+flags:
+  backend:
+    paths:
+      - Proj2/backend/
+  frontend:
+    paths:
+      - Proj2/frontend/src/
+
+ignore:
+  - "Proj2/backend/tests/"
+  - "Proj2/frontend/src/**/*.test.js"
+  - "Proj2/frontend/src/**/*.test.jsx"
+  - "Proj2/frontend/src/setupTests.js"
+  - "Proj2/frontend/src/reportWebVitals.js"
+  - "Proj2/backend/uploads/"
+  - "Proj2/backend/htmlcov/"
+  - "Proj1/"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: false

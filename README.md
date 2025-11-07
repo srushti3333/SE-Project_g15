@@ -4,7 +4,8 @@ The repository contains submissions for Software Engineering project done by Gro
 # 🍕 FoodPool: Eat Together. Save Together.
 
 [![Build Status](https://github.com/srushti3333/SE-Project_g15/actions/workflows/ci.yml/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
-[![codecov](https://codecov.io/gh/srushti3333/SE-Project_g15/branch/main/graph/badge.svg)](https://codecov.io/gh/srushti3333/SE-Project_g15)
+[![codecov](https://codecov.io/gh/srushti3333/SE-Project_g15/branch/codecov-test/graph/badge.svg?token=R1FHWXT0ML)](https://codecov.io/gh/srushti3333/SE-Project_g15)
+
 ![Flake8](https://img.shields.io/badge/style-flake8-blue)
 ![ESLint](https://img.shields.io/badge/lint-eslint-purple)
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
@@ -100,7 +101,7 @@ FoodPool enables community-driven pooled food orders, letting nearby users combi
 ```bash
 # Clone and navigate to backend
 git clone https://github.com/srushti3333/SE-Project_g15.git
-cd SE-Project_g15/backend
+cd SE-Project_g15/Proj2/backend
 
 # Create virtual environment
 python -m venv venv
@@ -142,14 +143,16 @@ App runs on `http://localhost:3000`
 
 # Backend
 ```bash
-cd backend
-pytest --cov=. --cov-report=html
+cd Proj2/backend
+python -m pytest --cov=. --cov-report=html -v
+# View coverage: open htmlcov/index.html
 ```
 
 # Frontend
 ```bash
-cd frontend
-npm test -- --coverage
+cd Proj2/frontend
+npm run coverage
+# View coverage: open coverage/lcov-report/index.html
 ```
 
 Test Coverage: 100+ test cases covering nominal and off-nominal scenarios
@@ -184,26 +187,27 @@ If you encounter issues while setting up or running FoodPool, try the following 
  📁 Project Structure
 ```
 SE-Project_g15/
-├── backend/
-│   ├── app.py              # Flask entry point
-│   ├── models/             # Database models
-│   ├── controllers/        # Relevant controllers
-│   ├── routes/             # API endpoints
-│   ├── requirements.txt    # Dependencies
-│   ├── .env    # Dependencies
-│   └── tests/              # Backend tests
-│
-├── frontend/
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── pages/          # Frontend tests present with each related file 
-│   │   ├── components/     # Common Components & Frontend tests present with each related file 
-│   │   └── context/        # App context
-│   │   └── routes/         # App route setup
-│   │   └── utils/          # Common utility constants
-│   │   └── hooks/          # Common hooks to use
-│   │   ├── setupTests.js
-│   └──  package.json        
+├── Proj2/
+│   ├── backend/
+│   │   ├── app.py              # Flask entry point
+│   │   ├── models/             # Database models
+│   │   ├── controllers/        # Relevant controllers
+│   │   ├── routes/             # API endpoints
+│   │   ├── requirements.txt    # Dependencies
+│   │   ├── .env               # Environment variables
+│   │   └── tests/              # Backend tests
+│   │
+│   └── frontend/
+│       ├── src/
+│       │   ├── App.jsx
+│       │   ├── pages/          # Frontend tests present with each related file 
+│       │   ├── components/     # Common Components & Frontend tests present with each related file 
+│       │   └── context/        # App context
+│       │   └── routes/         # App route setup
+│       │   └── utils/          # Common utility constants
+│       │   └── hooks/          # Common hooks to use
+│       │   ├── setupTests.js
+│       └──  package.json        
 └── .github/
     └── workflows/
         └── ci.yml          # CI/CD pipeline
@@ -310,6 +314,7 @@ All pull requests require:
 - Email: sthakar2@ncsu.edu, stpatel4@ncsu.edu, vpatel34@ncsu.edu, dbpatel5@ncsu.edu
 
 ---
+
 
 ### 📖 How to Cite
 
