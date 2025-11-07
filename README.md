@@ -279,6 +279,13 @@ QR Code for Mobile Access:
 
 ---
 
+### 💰 Funding
+
+This project is developed as part of the **Software Engineering course at North Carolina State University** by Group 15.  
+Currently, the project is self-funded by the team and does not receive external funding.
+
+---
+
  📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
