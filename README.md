@@ -254,24 +254,24 @@ git push origin feature/your-feature
 
 # ✅ Release 1 (October 2024)
 
-🔐 Authentication & User Profiles – Secure signup/login, profile management, password updates, location capture
+ 🧠 **Core Platform Architecture** - Stable backend and modular API ecosystem enabling real-time data sync, scalability, and secure operations across all modules.
+ 
+🍴 **Restaurant Intelligence Layer** - Context-aware restaurant discovery with structured menu mapping, item metadata, and dynamic content rendering.
 
-🍴 Restaurant Discovery & Menu System – Browse restaurants, view detailed menus, item cards with descriptions and pricing
+🛒 **Collaborative Ordering Engine** - Unified order flow supporting individual, pooled, and group-based checkouts with transaction consistency and shared tracking.
 
-🛒 Smart Cart & Group Pooling – Multi-item cart, three checkout modes (order alone, create group, join group), order history tracking
-
-🗳️ Collaborative Polling & Group Management – In-group polls, real-time voting, group status tracking, countdown timers
+⚡ **Real-Time Interaction Framework** - Low-latency polling, instant decision updates, and countdown-based coordination driving group synchronization and engagement.
 
 
 # 🚀 Release 2 (November 2024)
 
-📍 Location Intelligence & Delivery Optimization – Smart zone clustering, delivery partner portal, route optimization, real-time tracking with live ETAs
+📍 **AI-Powered Delivery Optimization** - Predictive routing, demand clustering, and adaptive ETA generation through real-time location intelligence.
 
-🌐 Public Pool Discovery & Social Features – Interactive map view, nearby group discovery, QR code sharing, user ratings, in-app messaging
+🌐 **Social Discovery & Network Dynamics** - Proximity-based group discovery, map visualizations, in-app messaging, and social graph integration for organic community growth.
 
-🎁 Dual-Layer Rewards & Incentive System – Restaurant partnerships with volume discounts, loyalty points program, tiered memberships, cashback rewards
+💎 **Reward Intelligence & Growth Loops** - Behavioral loyalty models, dynamic cashback tiers, and restaurant-driven partnerships that scale user retention.
 
-⭐ Gamification & Sustainability Analytics – Leaderboards, 50+ achievement badges, streak rewards, eco-impact dashboard, personal spending analytics
+📊 **Gamified Analytics & Impact Insights** - Personal spending analytics, sustainability impact tracking, achievement ecosystems, and leaderboard-driven engagement.
 
 ---
 
