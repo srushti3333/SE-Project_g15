@@ -39,23 +39,25 @@ jobs:
         run: |
           cd Proj2/backend
           pip install -r requirements.txt
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov coverage
 
       - name: Run tests with coverage
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/foodpool_test
           JWT_SECRET_KEY: test-secret-key
+          FLASK_ENV: testing
         run: |
           cd Proj2/backend
           echo "Current directory: $(pwd)"
-          echo "Files in directory:"
-          ls -la
-          echo "Running pytest..."
-          python -m pytest tests/ --cov=. --cov-report=xml --cov-report=term -v --tb=short || true
-          echo "Pytest completed with exit code: $?"
-          echo "Checking for coverage files after pytest..."
-          ls -la *.xml || echo "No XML files found"
-          ls -la .coverage || echo "No .coverage file found"
+          echo "Python version: $(python --version)"
+          echo "Pip list:"
+          pip list | grep -E "(pytest|coverage|flask)"
+          echo "Running the same command that works locally..."
+          python -m pytest --cov=. --cov-report=xml --cov-report=html -v
+          echo "Pytest exit code: $?"
+          echo "Checking for coverage files:"
+          ls -la coverage.xml || echo "No coverage.xml found"
+          ls -la htmlcov/ || echo "No htmlcov directory found"
         continue-on-error: true
 
       - name: Check coverage file
