@@ -5,7 +5,6 @@ The repository contains submissions for Software Engineering project done by Gro
 
 [![Build Status](https://github.com/srushti3333/SE-Project_g15/actions/workflows/ci.yml/badge.svg)](https://github.com/srushti3333/SE-Project_g15/actions)
 [![codecov](https://codecov.io/gh/srushti3333/SE-Project_g15/branch/codecov-test/graph/badge.svg?token=R1FHWXT0ML)](https://codecov.io/gh/srushti3333/SE-Project_g15)
-
 ![Flake8](https://img.shields.io/badge/style-flake8-blue)
 ![ESLint](https://img.shields.io/badge/lint-eslint-purple)
 ![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)
