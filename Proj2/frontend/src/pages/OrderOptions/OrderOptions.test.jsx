@@ -1,129 +1,114 @@
-// src/pages/OrderOptions/OrderOptions.test.jsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import OrderOptionsModal from './OrderOptions';
 import * as groupApi from '../../api/groups';
 import * as orderApi from '../../api/orders';
 import { useCart } from '../../context/CartContext';
+
 jest.mock('../../context/CartContext');
 jest.mock('../../api/groups');
 jest.mock('../../api/orders');
 
-
 describe('OrderOptionsModal', () => {
+  const mockCart = [
+    { id: 1, name: 'Pizza', quantity: 2 },
+    { id: 2, name: 'Burger', quantity: 1 }
+  ];
+
   beforeEach(() => {
     useCart.mockReturnValue({
-      cart: [],
-      addToCart: jest.fn(),
-      removeFromCart: jest.fn(),
+      cart: mockCart,
+      cartTotal: 30,
+      clearCart: jest.fn(),
     });
   });
 
-  test('renders title and buttons correctly', () => {
-    render(
-      <MemoryRouter>
-        <OrderOptionsModal />
-      </MemoryRouter>
-    );
+  test('renders initial options', () => {
+    render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
 
-    expect(screen.getByText(/order options/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+    expect(screen.getByText(/order now/i)).toBeInTheDocument();
+    expect(screen.getByText(/create a pool/i)).toBeInTheDocument();
+    expect(screen.getByText(/join a pool/i)).toBeInTheDocument();
   });
 
-  test('calls API when submitting an order', async () => {
-    orderApi.createOrder.mockResolvedValueOnce({ id: 1 });
+  test('Order Now flow calls placeImmediateOrder', async () => {
+    groupApi.createGroup.mockResolvedValueOnce({ id: 1 });
+    orderApi.placeImmediateOrder.mockResolvedValueOnce({});
 
-    render(
-      <MemoryRouter>
-        <OrderOptionsModal />
-      </MemoryRouter>
-    );
+    render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
 
-    const confirmButton = screen.getByRole('button', { name: /confirm/i });
-    fireEvent.click(confirmButton);
+    fireEvent.click(screen.getByText(/order now/i));
+
+    fireEvent.change(screen.getByPlaceholderText(/default/i), { target: { value: 'Building A' } });
+    fireEvent.click(screen.getByText(/confirm & place order/i));
 
     await waitFor(() => {
-      expect(orderApi.createOrder).toHaveBeenCalled();
+      expect(groupApi.createGroup).toHaveBeenCalled();
+      expect(orderApi.placeImmediateOrder).toHaveBeenCalled();
+      expect(useCart().clearCart).toHaveBeenCalled();
+    });
+
+    expect(screen.getByText(/order placed successfully/i)).toBeInTheDocument();
+  });
+
+  test('Create Pool flow calls createGroup and placeGroupOrder', async () => {
+    groupApi.createGroup.mockResolvedValueOnce({ id: 2 });
+    orderApi.placeGroupOrder.mockResolvedValueOnce({});
+
+    render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
+
+    fireEvent.click(screen.getByText(/create a pool/i));
+    fireEvent.change(screen.getByPlaceholderText(/e\.g\., building a/i), { target: { value: 'Office' } });
+    fireEvent.click(screen.getByText(/create pool & wait/i));
+
+    await waitFor(() => {
+      expect(groupApi.createGroup).toHaveBeenCalled();
+      expect(orderApi.placeGroupOrder).toHaveBeenCalled();
+      expect(useCart().clearCart).toHaveBeenCalled();
+    });
+
+    expect(screen.getByText(/pool created/i)).toBeInTheDocument();
+  });
+
+  test('Join Pool flow fetches nearby pools and joins', async () => {
+    groupApi.getAllGroups.mockResolvedValueOnce([
+      { id: 3, restaurant_id: 1, name: 'Test Pool', members: [], maxMembers: 5, nextOrderTime: new Date(Date.now() + 60000).toISOString(), organizer: 'Alice', deliveryLocation: 'Office' }
+    ]);
+    groupApi.joinGroup.mockResolvedValueOnce({});
+    orderApi.placeGroupOrder.mockResolvedValueOnce({});
+
+    render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
+
+    fireEvent.click(screen.getByText(/join a pool/i));
+
+    await waitFor(() => screen.getByText(/test pool/i));
+    fireEvent.click(screen.getByText(/join this pool/i));
+
+    await waitFor(() => {
+      expect(groupApi.joinGroup).toHaveBeenCalledWith(3);
+      expect(orderApi.placeGroupOrder).toHaveBeenCalled();
+      expect(useCart().clearCart).toHaveBeenCalled();
+    });
+
+    expect(screen.getByText(/joined pool successfully/i)).toBeInTheDocument();
+  });
+
+  test('shows error if delivery location is empty for Order Now', async () => {
+    render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
+
+    fireEvent.click(screen.getByText(/order now/i));
+    fireEvent.click(screen.getByText(/confirm & place order/i));
+
+    await waitFor(() => {
+      expect(screen.getByText(/please enter a delivery location/i)).toBeInTheDocument();
     });
   });
 
-  test('closes modal on cancel', () => {
-    const { getByRole } = render(
-      <MemoryRouter>
-        <OrderOptionsModal />
-      </MemoryRouter>
-    );
+  test('handles empty cart gracefully', () => {
+    useCart.mockReturnValue({ cart: [], cartTotal: 0, clearCart: jest.fn() });
 
-    const cancelButton = getByRole('button', { name: /cancel/i });
-    fireEvent.click(cancelButton);
+    render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
 
-    // Assuming your modal unmounts or hides
-    expect(cancelButton).not.toBeInTheDocument();
+    expect(screen.getByText(/no order data/i)).toBeInTheDocument();
   });
-  test('loads and displays group options', async () => {
-  groupApi.getGroups.mockResolvedValueOnce([
-    { id: 1, name: 'Friends' },
-    { id: 2, name: 'Family' },
-  ]);
-
-  render(
-    <MemoryRouter>
-      <OrderOptionsModal />
-    </MemoryRouter>
-  );
-
-  await waitFor(() => {
-    expect(screen.getByText('Friends')).toBeInTheDocument();
-    expect(screen.getByText('Family')).toBeInTheDocument();
-  });
-});
-
-test('handles API error gracefully', async () => {
-  orderApi.createOrder.mockRejectedValueOnce(new Error('Network error'));
-
-  render(
-    <MemoryRouter>
-      <OrderOptionsModal />
-    </MemoryRouter>
-  );
-
-  const confirmButton = screen.getByRole('button', { name: /confirm/i });
-  fireEvent.click(confirmButton);
-
-  await waitFor(() => {
-    expect(screen.getByText(/error/i)).toBeInTheDocument();
-  });
-});
-
-test('updates selection and re-renders summary', async () => {
-  groupApi.getGroups.mockResolvedValueOnce([{ id: 1, name: 'Test Group' }]);
-
-  render(
-    <MemoryRouter>
-      <OrderOptionsModal />
-    </MemoryRouter>
-  );
-
-  // Wait for groups to load
-  await waitFor(() => screen.getByText('Test Group'));
-
-  // Example: simulate dropdown or radio change
-  const groupOption = screen.getByText('Test Group');
-  fireEvent.click(groupOption);
-
-  expect(screen.getByText(/summary/i)).toBeInTheDocument();
-});
-
-});
-
-test("handles empty group API response", async () => {
-  groupApi.getGroups.mockResolvedValueOnce([]);
-  render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
-  await waitFor(() => expect(screen.getByText(/no groups available/i)).toBeInTheDocument());
-});
-
-test("renders correctly with existing cart items", async () => {
-  useCart.mockReturnValue({ cart: [{ id: 1, name: "Pizza" }], addToCart: jest.fn(), removeFromCart: jest.fn() });
-  render(<MemoryRouter><OrderOptionsModal /></MemoryRouter>);
-  expect(screen.getByText(/pizza/i)).toBeInTheDocument();
 });

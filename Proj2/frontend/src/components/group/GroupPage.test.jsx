@@ -2,21 +2,25 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import GroupsPage from './GroupsPage';
 import { getUserGroups } from '../../api/groups';
-import GroupCard from '../../components/group/GroupCard';
 
-// Mock the API and component
 jest.mock('../../api/groups', () => ({
   getUserGroups: jest.fn(),
 }));
 
-jest.mock('../../components/group/GroupCard', () => jest.fn(() => <div data-testid="group-card" />));
+// Mock GroupCard to actually render group name
+jest.mock('../../components/group/GroupCard', () => ({ group }) => (
+  <div data-testid="group-card">{group.name}</div>
+));
 
-describe('GroupsPage', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('GroupsPage enhanced coverage', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('renders header', () => {
+    render(<GroupsPage />);
+    expect(screen.getByText(/Your Groups/i)).toBeInTheDocument();
   });
 
-  it('renders header and fetches user groups', async () => {
+  it('renders multiple groups from API', async () => {
     const mockGroups = [
       { id: 1, name: 'Lunch Crew' },
       { id: 2, name: 'Study Group' },
@@ -25,42 +29,40 @@ describe('GroupsPage', () => {
 
     render(<GroupsPage />);
 
-    // Header should always render immediately
-    expect(screen.getByText(/Your Groups/i)).toBeInTheDocument();
-
-    // Wait for async groups to load
     await waitFor(() => {
       expect(getUserGroups).toHaveBeenCalledTimes(1);
       expect(screen.getAllByTestId('group-card')).toHaveLength(2);
+      expect(screen.getByText('Lunch Crew')).toBeInTheDocument();
+      expect(screen.getByText('Study Group')).toBeInTheDocument();
     });
   });
 
-  it('renders no GroupCard when API returns empty list', async () => {
+  it('handles empty groups gracefully', async () => {
     getUserGroups.mockResolvedValueOnce([]);
-
     render(<GroupsPage />);
 
-    await waitFor(() => {
-      expect(getUserGroups).toHaveBeenCalledTimes(1);
-    });
-
-    expect(screen.queryByTestId('group-card')).toBeNull();
+    await waitFor(() => expect(getUserGroups).toHaveBeenCalledTimes(1));
+    expect(screen.queryAllByTestId('group-card')).toHaveLength(0);
   });
 
-  it('handles API error gracefully', async () => {
+  it('handles API error without crashing', async () => {
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    getUserGroups.mockRejectedValueOnce(new Error('Network error'));
+    getUserGroups.mockRejectedValueOnce(new Error('API error'));
 
     render(<GroupsPage />);
 
-    await waitFor(() => {
-      expect(getUserGroups).toHaveBeenCalledTimes(1);
-    });
-
-    // It should log the error, but not crash or show GroupCard
+    await waitFor(() => expect(getUserGroups).toHaveBeenCalledTimes(1));
+    expect(screen.queryAllByTestId('group-card')).toHaveLength(0);
     expect(consoleSpy).toHaveBeenCalled();
-    expect(screen.queryByTestId('group-card')).toBeNull();
 
     consoleSpy.mockRestore();
+  });
+
+  it('renders correctly if API returns null or invalid data', async () => {
+    getUserGroups.mockResolvedValueOnce(null);
+    render(<GroupsPage />);
+
+    await waitFor(() => expect(getUserGroups).toHaveBeenCalledTimes(1));
+    expect(screen.queryAllByTestId('group-card')).toHaveLength(0);
   });
 });
